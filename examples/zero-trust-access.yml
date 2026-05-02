@@ -1,0 +1,82 @@
+title: Zero Trust Access
+direction: LR
+
+zones:
+  - id: users
+    name: External Users
+
+  - id: identity
+    name: Identity Layer
+
+  - id: access
+    name: Access Layer
+
+  - id: private_app
+    name: Private Application Segment
+
+  - id: management
+    name: Management Segment
+
+nodes:
+  - id: user
+    name: Remote User
+    type: external
+    zone: users
+
+  - id: idp
+    name: Identity Provider
+    type: external
+    zone: identity
+    role: authentication
+
+  - id: zt_gateway
+    name: Zero Trust Gateway
+    type: load_balancer
+    zone: access
+    ip: 192.0.2.10
+    role: policy enforcement
+
+  - id: app01
+    name: Private Application
+    type: server
+    zone: private_app
+    ip: 10.30.10.20
+    role: internal app
+
+  - id: admin_portal
+    name: Admin Portal
+    type: server
+    zone: management
+    ip: 10.30.99.20
+    role: administration
+
+connections:
+  - source: user
+    target: idp
+    protocol: HTTPS
+    port: 443
+    purpose: sign in
+
+  - source: user
+    target: zt_gateway
+    protocol: HTTPS
+    port: 443
+    purpose: access request
+
+  - source: zt_gateway
+    target: idp
+    protocol: HTTPS
+    port: 443
+    purpose: token validation
+
+  - source: zt_gateway
+    target: app01
+    protocol: HTTPS
+    port: 8443
+    purpose: private app access
+
+  - source: zt_gateway
+    target: admin_portal
+    protocol: HTTPS
+    port: 9443
+    purpose: privileged access

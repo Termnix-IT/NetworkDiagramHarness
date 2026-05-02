@@ -1,0 +1,52 @@
+title: Simple Network
+direction: LR
+
+nodes:
+  - id: internet
+    name: Internet
+    type: external
+
+  - id: fw01
+    name: Edge Firewall
+    type: firewall
+
+  - id: lb01
+    name: Load Balancer
+    type: load_balancer
+
+  - id: web01
+    name: Web Server 01
+    type: server
+
+  - id: web02
+    name: Web Server 02
+    type: server
+
+  - id: db01
+    name: Primary Database
+    type: database
+
+connections:
+  - source: internet
+    target: fw01
+    label: HTTPS 443
+
+  - source: fw01
+    target: lb01
+    label: HTTPS 443
+
+  - source: lb01
+    target: web01
+    label: HTTP 8080
+
+  - source: lb01
+    target: web02
+    label: HTTP 8080
+
+  - source: web01
+    target: db01
+    label: PostgreSQL 5432
+
+  - source: web02
+    target: db01
+    label: PostgreSQL 5432

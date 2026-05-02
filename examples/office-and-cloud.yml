@@ -1,0 +1,102 @@
+title: Office And Cloud Network
+direction: LR
+
+zones:
+  - id: office
+    name: Office Network
+
+  - id: edge
+    name: Office Edge
+
+  - id: cloud_edge
+    name: Cloud Edge
+
+  - id: cloud_app
+    name: Cloud Application Segment
+
+  - id: cloud_data
+    name: Cloud Data Segment
+
+nodes:
+  - id: office_lan
+    name: Office LAN
+    type: network
+    zone: office
+    ip: 10.10.0.1
+    role: user subnet
+
+  - id: office_fw
+    name: Office Firewall
+    type: firewall
+    zone: edge
+    ip: 198.51.100.10
+
+  - id: cloud_vpn
+    name: Cloud VPN Gateway
+    type: network
+    zone: cloud_edge
+    ip: 198.51.100.20
+    role: vpn gateway
+
+  - id: cloud_fw
+    name: Cloud Firewall
+    type: firewall
+    zone: cloud_edge
+    ip: 10.20.0.10
+
+  - id: internal_lb
+    name: Internal Load Balancer
+    type: load_balancer
+    zone: cloud_app
+    ip: 10.20.10.10
+
+  - id: app01
+    name: Cloud App Server
+    type: server
+    zone: cloud_app
+    ip: 10.20.10.21
+    role: application
+
+  - id: db01
+    name: Managed Database
+    type: database
+    zone: cloud_data
+    ip: 10.20.20.30
+    role: primary
+
+connections:
+  - source: office_lan
+    target: office_fw
+    protocol: HTTPS
+    port: 443
+    purpose: outbound application access
+
+  - source: office_fw
+    target: cloud_vpn
+    protocol: IPsec
+    port: 500
+    purpose: site-to-site tunnel
+
+  - source: cloud_vpn
+    target: cloud_fw
+    protocol: TCP
+    port: 10000-10100
+    purpose: routed private traffic
+
+  - source: cloud_fw
+    target: internal_lb
+    protocol: HTTPS
+    port: 443
+    purpose: application ingress
+
+  - source: internal_lb
+    target: app01
+    protocol: HTTP
+    port: 8080
+    purpose: service traffic
+
+  - source: app01
+    target: db01
+    protocol: PostgreSQL
+    port: 5432
+    purpose: application data

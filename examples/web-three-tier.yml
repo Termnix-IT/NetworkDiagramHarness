@@ -1,0 +1,118 @@
+title: Web Three Tier Network
+direction: LR
+
+zones:
+  - id: internet
+    name: Internet
+
+  - id: dmz
+    name: DMZ
+    description: Public-facing network segment.
+
+  - id: app
+    name: Application Segment
+
+  - id: db
+    name: Database Segment
+
+  - id: management
+    name: Management Segment
+
+nodes:
+  - id: internet
+    name: Internet
+    type: external
+    zone: internet
+
+  - id: fw01
+    name: Edge Firewall
+    type: firewall
+    zone: dmz
+    ip: 203.0.113.10
+
+  - id: lb01
+    name: Load Balancer
+    type: load_balancer
+    zone: dmz
+    ip: 10.0.1.10
+    role: public ingress
+
+  - id: web01
+    name: Web Server 01
+    type: server
+    zone: app
+    ip: 10.0.10.11
+    role: web
+    environment: production
+
+  - id: web02
+    name: Web Server 02
+    type: server
+    zone: app
+    ip: 10.0.10.12
+    role: web
+    environment: production
+
+  - id: db01
+    name: Primary Database
+    type: database
+    zone: db
+    ip: 10.0.20.11
+    role: primary
+    environment: production
+
+  - id: bastion01
+    name: Bastion Host
+    type: server
+    zone: management
+    ip: 10.0.99.10
+    role: admin entrypoint
+
+connections:
+  - source: internet
+    target: fw01
+    protocol: HTTPS
+    port: 443
+    purpose: public access
+
+  - source: fw01
+    target: lb01
+    protocol: HTTPS
+    port: 443
+    purpose: ingress filtering
+
+  - source: lb01
+    target: web01
+    protocol: HTTP
+    port: 8080
+    purpose: application traffic
+
+  - source: lb01
+    target: web02
+    protocol: HTTP
+    port: 8080
+    purpose: application traffic
+
+  - source: web01
+    target: db01
+    protocol: PostgreSQL
+    port: 5432
+    purpose: application data
+
+  - source: web02
+    target: db01
+    protocol: PostgreSQL
+    port: 5432
+    purpose: application data
+
+  - source: bastion01
+    target: web01
+    protocol: SSH
+    port: 22
+    purpose: administration
+
+  - source: bastion01
+    target: web02
+    protocol: SSH
+    port: 22
+    purpose: administration

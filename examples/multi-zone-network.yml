@@ -1,0 +1,148 @@
+title: Multi Zone Network
+direction: LR
+
+zones:
+  - id: internet
+    name: Internet
+
+  - id: edge
+    name: Edge Network
+
+  - id: dmz
+    name: DMZ
+
+  - id: app
+    name: Application Segment
+
+  - id: data
+    name: Data Segment
+
+  - id: observability
+    name: Observability Segment
+
+nodes:
+  - id: internet
+    name: Internet
+    type: external
+    zone: internet
+
+  - id: edge_fw
+    name: Edge Firewall
+    type: firewall
+    zone: edge
+    ip: 203.0.113.20
+
+  - id: waf01
+    name: Web Application Firewall
+    type: firewall
+    zone: dmz
+    ip: 10.1.1.10
+    role: web protection
+
+  - id: app_lb
+    name: Application Load Balancer
+    type: load_balancer
+    zone: app
+    ip: 10.1.10.10
+
+  - id: app01
+    name: Application Server 01
+    type: server
+    zone: app
+    ip: 10.1.10.21
+    role: application
+
+  - id: app02
+    name: Application Server 02
+    type: server
+    zone: app
+    ip: 10.1.10.22
+    role: application
+
+  - id: cache01
+    name: Cache Server
+    type: server
+    zone: data
+    ip: 10.1.20.20
+    role: cache
+
+  - id: db01
+    name: Primary Database
+    type: database
+    zone: data
+    ip: 10.1.20.30
+    role: primary
+
+  - id: metrics01
+    name: Metrics Collector
+    type: server
+    zone: observability
+    ip: 10.1.30.10
+    role: metrics
+
+connections:
+  - source: internet
+    target: edge_fw
+    protocol: HTTPS
+    port: 443
+    purpose: public traffic
+
+  - source: edge_fw
+    target: waf01
+    protocol: HTTPS
+    port: 443
+    purpose: edge filtering
+
+  - source: waf01
+    target: app_lb
+    protocol: HTTPS
+    port: 443
+    purpose: protected ingress
+
+  - source: app_lb
+    target: app01
+    protocol: HTTP
+    port: 8080
+    purpose: application traffic
+
+  - source: app_lb
+    target: app02
+    protocol: HTTP
+    port: 8080
+    purpose: application traffic
+
+  - source: app01
+    target: cache01
+    protocol: TCP
+    port: 6379
+    purpose: cache access
+
+  - source: app02
+    target: cache01
+    protocol: TCP
+    port: 6379
+    purpose: cache access
+
+  - source: app01
+    target: db01
+    protocol: PostgreSQL
+    port: 5432
+    purpose: application data
+
+  - source: app02
+    target: db01
+    protocol: PostgreSQL
+    port: 5432
+    purpose: application data
+
+  - source: metrics01
+    target: app01
+    protocol: HTTPS
+    port: 9100-9200
+    purpose: metrics scrape
+
+  - source: metrics01
+    target: app02
+    protocol: HTTPS
+    port: 9100-9200
+    purpose: metrics scrape

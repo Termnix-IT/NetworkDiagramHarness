@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "network-diagram-harness"
+version = "0.1.0"
+description = "Generate network and server architecture diagrams from structured definitions."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+keywords = ["network", "diagram", "mermaid", "infrastructure", "architecture"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Documentation",
+    "Topic :: System :: Networking",
+]
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+network-diagram-harness = "network_diagram_harness.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-p no:cacheprovider"
+norecursedirs = [".venv", ".tmp", "pip-cache", "pytest-cache-files-*", "output"]
