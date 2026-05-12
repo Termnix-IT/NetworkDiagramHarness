@@ -84,7 +84,7 @@ YAML は主に以下の要素を持ちます。
 | SVG | `export` / `export-all` | ドキュメント貼り付けやレビュー用画像 |
 | PNG | `export` / `export-all` | 画像としての共有用 |
 | PDF | `export` / `export-all` | 固定レイアウトの配布用 |
-| Layout SVG | `export-layout` | 掲載向けの人間が読みやすい固定配置 SVG |
+| Layout SVG / PNG | `export-layout` | 掲載向けの人間が読みやすい固定配置画像 |
 
 出力先の標準:
 
@@ -203,7 +203,7 @@ network-diagram-harness export-all local --output-dir output/images --format svg
 
 ## Layout Export Rules
 
-掲載向け SVG 出力は `svg.py` が担当します。
+掲載向け SVG / PNG 出力は `svg.py` が担当します。
 
 現時点の対応 profile:
 
@@ -213,6 +213,10 @@ network-diagram-harness export-all local --output-dir output/images --format svg
 
 ```powershell
 network-diagram-harness export-layout examples/profile-home-lab.yml --output output/images/profile-home-lab-layout.svg
+```
+
+```powershell
+network-diagram-harness export-layout examples/profile-home-lab.yml --output output/images/profile-home-lab-layout.png --puppeteer-config-file scripts/puppeteer-config.json
 ```
 
 ## File Placement Rules

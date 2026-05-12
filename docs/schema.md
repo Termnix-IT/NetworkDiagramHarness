@@ -43,6 +43,7 @@ layout:
 | Value | Meaning |
 | --- | --- |
 | `home_lab` | 自宅ネットワーク / home lab 向けの固定配置 template です。Internet, Cloud, Edge, DMZ, Internal, VLAN 系の領域を見やすく配置します。 |
+| `home_lab_private` | 実 IP や長い role を含む自分向け構成図用の広めの固定配置 template です。 |
 
 ## Direction
 
@@ -212,7 +213,7 @@ source -->|"HTTPS / 443 / public access"| target
 現時点の parser は以下を検証します。
 
 - `direction` は `TB`, `TD`, `BT`, `RL`, `LR` のみ許可
-- `layout.profile` は未指定または `home_lab` のみ許可
+- `layout.profile` は未指定、`home_lab`、`home_lab_private` のみ許可
 - `zone.id` の重複はエラー
 - `node.id` の重複はエラー
 - `node.zone` は既存 `zone.id` のみ許可

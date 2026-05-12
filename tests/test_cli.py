@@ -150,6 +150,41 @@ def test_export_layout_command_writes_svg() -> None:
     assert "Internet" in content
 
 
+def test_export_layout_command_writes_png_with_node_helper(monkeypatch) -> None:
+    input_path = make_test_path("layout-png-diagram.yml")
+    output_path = make_test_path("layout.png")
+    input_path.write_text(
+        "layout:\n"
+        "  profile: home_lab\n"
+        "nodes:\n"
+        "  - id: internet\n"
+        "    name: Internet\n"
+        "    type: external\n",
+        encoding="utf-8",
+    )
+    calls = []
+
+    def fake_run(command, check):
+        calls.append((command, check))
+
+    monkeypatch.setattr("network_diagram_harness.svg.subprocess.run", fake_run)
+
+    run_cli(
+        [
+            "network-diagram-harness",
+            "export-layout",
+            str(input_path),
+            "--output",
+            str(output_path),
+            "--puppeteer-config-file",
+            "scripts/puppeteer-config.json",
+        ]
+    )
+
+    assert calls
+    assert calls[0][0][0] == "node"
+
+
 def test_cli_reports_validation_errors_without_traceback(capsys) -> None:
     input_path = make_test_path("invalid-diagram.yml")
     input_path.write_text(

@@ -180,7 +180,7 @@ flowchart LR
 | `preview` | Mermaid code block を埋め込んだ Markdown を生成します。 |
 | `export` | Mermaid CLI を使って SVG/PNG/PDF を生成します。 |
 | `export-all` | ディレクトリ配下の `*.yml` をまとめて画像化します。 |
-| `export-layout` | 人間が見やすい固定配置 SVG を生成します。 |
+| `export-layout` | 人間が見やすい固定配置 SVG/PNG を生成します。 |
 
 後方互換のため、`network-diagram-harness examples/simple-network.yml` も `render` と同じ動作をします。
 

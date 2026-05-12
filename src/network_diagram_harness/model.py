@@ -17,7 +17,7 @@ ALLOWED_NODE_TYPES = {
     "subnet",
 }
 ALLOWED_CONNECTION_DIRECTIONS = {"outbound", "inbound", "bidirectional"}
-ALLOWED_LAYOUT_PROFILES = {"home_lab"}
+ALLOWED_LAYOUT_PROFILES = {"home_lab", "home_lab_private"}
 PROTOCOL_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+._-]*$")
 
 

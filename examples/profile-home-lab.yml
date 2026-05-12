@@ -1,4 +1,4 @@
-title: Profile Home Lab Network
+title: 自宅ネットワーク・クラウド構成
 direction: TB
 
 layout:
@@ -6,96 +6,96 @@ layout:
 
 zones:
   - id: internet
-    name: Internet
+    name: インターネット
 
   - id: home_edge
-    name: Home Edge
+    name: 自宅エッジ
 
   - id: dmz
-    name: Home Lab Service Zone
+    name: 自宅ラボサービス
 
   - id: internal
-    name: Segmented Internal Network
+    name: 内部セグメント
 
   - id: cloud
-    name: Cloud Hosting
+    name: クラウド公開基盤
 
 nodes:
   - id: internet
-    name: Internet
+    name: インターネット
     type: external
     zone: internet
 
   - id: isp_edge
-    name: ISP Access
+    name: 回線接続
     type: external
     zone: internet
-    role: fiber connection / dynamic DNS
+    role: 光回線 / 動的DNS
 
   - id: edge_router
-    name: Edge Router
+    name: エッジルーター
     type: firewall
     zone: home_edge
-    role: NAT / firewall / home edge
+    role: NAT / Firewall / 自宅境界
 
   - id: lab_service_host
-    name: Lab Service Host
+    name: ラボ用サーバー
     type: server
     zone: dmz
-    role: self-hosted lab services
+    role: 自宅内サービス
 
   - id: internal_router
-    name: Internal Router
+    name: 内部ルーター
     type: firewall
     zone: internal
-    role: VLAN / ACL / monitoring
+    role: VLAN / ACL / 監視
 
   - id: client_segment
-    name: Client Segment
+    name: クライアント
     type: subnet
     zone: internal
-    role: daily-use devices
+    role: 日常利用端末
 
   - id: server_segment
-    name: Server Segment
+    name: サーバー
     type: subnet
     zone: internal
-    role: lab services
+    role: ラボ用途
 
   - id: wifi_segment
-    name: Wi-Fi Segment
+    name: Wi-Fi
     type: subnet
     zone: internal
-    role: wireless clients
+    role: 無線端末
 
   - id: test_segment
-    name: Test Segment
+    name: 検証環境
     type: subnet
     zone: internal
-    role: isolated experiments
+    role: 分離テスト
 
   - id: monitoring_server
-    name: Monitoring Server
+    name: 監視サーバー
     type: server
     zone: internal
-    role: metrics / file service
+    role: メトリクス / ファイル共有
 
   - id: cdn
     name: CDN
     type: load_balancer
     zone: cloud
-    role: public website delivery
+    role: 公開サイト配信
 
   - id: object_storage
-    name: Object Storage
+    name: オブジェクトストレージ
     type: database
     zone: cloud
-    role: static website origin
+    role: 静的サイト配信元
 
 connections:
   - source: internet
     target: isp_edge
-    label: fiber internet
+    label: 光回線
 
   - source: isp_edge
     target: edge_router
@@ -103,19 +103,19 @@ connections:
 
   - source: edge_router
     target: lab_service_host
-    label: home lab access
+    label: ラボ接続
 
   - source: edge_router
     target: internal_router
-    label: internal uplink
+    label: 内部接続
 
   - source: internal_router
     target: client_segment
-    label: client VLAN
+    label: クライアントVLAN
 
   - source: internal_router
     target: server_segment
-    label: server VLAN
+    label: サーバーVLAN
 
   - source: internal_router
     target: wifi_segment
@@ -123,21 +123,20 @@ connections:
 
   - source: internal_router
     target: test_segment
-    label: test VLAN
+    label: 検証VLAN
 
   - source: monitoring_server
     target: internal_router
-    label: network monitoring
+    label: ネットワーク監視
 
   - source: monitoring_server
     target: lab_service_host
-    label: host monitoring
+    label: ホスト監視
 
   - source: internet
     target: cdn
-    protocol: HTTPS
-    port: 443
+    label: HTTPS 443 公開サイト
 
   - source: cdn
     target: object_storage
-    label: origin
+    label: オリジン

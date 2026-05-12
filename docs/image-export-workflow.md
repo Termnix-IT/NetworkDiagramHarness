@@ -72,6 +72,8 @@ output/images/private/home-network.png
 output/images/public/profile-home-lab.png
 output/images/private/home-network-layout.svg
 output/images/public/profile-home-lab-layout.svg
+output/images/private/home-network-layout.png
+output/images/public/profile-home-lab-layout.png
 ```
 
 専用スクリプトは既定で `1400x1000` の PNG と、掲載向け固定配置 SVG を生成します。PNG 生成では `scripts/puppeteer-config.json` を使って Mermaid CLI のブラウザ起動を安定させます。
@@ -127,6 +129,12 @@ Mermaid の自動レイアウトではなく、人間が見やすい固定配置
 
 ```powershell
 .\.venv\Scripts\network-diagram-harness.exe export-layout examples/profile-home-lab.yml --output output/images/public/profile-home-lab-layout.svg
+```
+
+PNG で出す場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export-layout examples/profile-home-lab.yml --output output/images/public/profile-home-lab-layout.png --puppeteer-config-file scripts/puppeteer-config.json
 ```
 
 詳細は [layout-workflow.md](layout-workflow.md) にまとめています。

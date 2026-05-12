@@ -32,6 +32,7 @@ $Diagrams = @(
         Mermaid = "output\home-network.mmd"
         Image = "output\images\private\home-network.$Format"
         LayoutImage = "output\images\private\home-network-layout.svg"
+        LayoutPng = "output\images\private\home-network-layout.png"
     },
     @{
         Name = "profile-home-lab"
@@ -41,6 +42,7 @@ $Diagrams = @(
         Mermaid = "output\profile-home-lab.mmd"
         Image = "output\images\public\profile-home-lab.$Format"
         LayoutImage = "output\images\public\profile-home-lab-layout.svg"
+        LayoutPng = "output\images\public\profile-home-lab-layout.png"
     }
 )
 
@@ -76,6 +78,10 @@ try {
             Write-Host "Writing layout image: $($Diagram.LayoutImage)"
             & $Harness export-layout $Diagram.Source --output $Diagram.LayoutImage
             if ($LASTEXITCODE -ne 0) { throw "Command failed: export-layout $($Diagram.Source)" }
+
+            Write-Host "Writing layout PNG: $($Diagram.LayoutPng)"
+            & $Harness export-layout $Diagram.Source --output $Diagram.LayoutPng --puppeteer-config-file $PuppeteerConfigFile
+            if ($LASTEXITCODE -ne 0) { throw "Command failed: export-layout PNG $($Diagram.Source)" }
         }
     }
 }

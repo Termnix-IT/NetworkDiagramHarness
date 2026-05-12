@@ -8,7 +8,7 @@ from .io import load_diagram, write_output
 from .export import export_directory_with_mermaid_cli, export_with_mermaid_cli
 from .mermaid import render_mermaid
 from .preview import render_markdown_preview
-from .svg import write_layout_svg
+from .svg import export_layout
 
 
 COMMANDS = {"export", "export-all", "export-layout", "render", "validate", "preview"}
@@ -141,6 +141,16 @@ def build_command_parser() -> argparse.ArgumentParser:
     )
     export_layout_parser.add_argument("input", type=Path)
     export_layout_parser.add_argument("-o", "--output", type=Path, required=True)
+    export_layout_parser.add_argument(
+        "--node",
+        default="node",
+        help="Node.js executable used for layout PNG export. Defaults to node.",
+    )
+    export_layout_parser.add_argument(
+        "--puppeteer-config-file",
+        type=Path,
+        help="Puppeteer JSON config file used for layout PNG export.",
+    )
 
     return parser
 
@@ -189,7 +199,7 @@ def run_export_all(args: argparse.Namespace) -> None:
 
 def run_export_layout(args: argparse.Namespace) -> None:
     diagram = load_diagram(args.input)
-    write_layout_svg(diagram, args.output)
+    export_layout(diagram, args.output, args.node, args.puppeteer_config_file)
 
 
 if __name__ == "__main__":

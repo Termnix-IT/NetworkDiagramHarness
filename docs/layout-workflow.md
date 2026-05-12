@@ -35,6 +35,13 @@ layout:
 | Internal Network | 中央下 |
 | VLAN / subnet | Internal Network 下部 |
 
+実 IP、実機名、長い role を含む自分向け構成図では、より広い `home_lab_private` profile を使います。
+
+```yaml
+layout:
+  profile: home_lab_private
+```
+
 ## Export
 
 公開向け SVG:
@@ -43,10 +50,22 @@ layout:
 .\.venv\Scripts\network-diagram-harness.exe export-layout examples/profile-home-lab.yml --output output/images/public/profile-home-lab-layout.svg
 ```
 
+公開向け PNG:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export-layout examples/profile-home-lab.yml --output output/images/public/profile-home-lab-layout.png --puppeteer-config-file scripts/puppeteer-config.json
+```
+
 自分向け SVG:
 
 ```powershell
 .\.venv\Scripts\network-diagram-harness.exe export-layout local/home-network.local.yml --output output/images/private/home-network-layout.svg
+```
+
+自分向け PNG:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export-layout local/home-network.local.yml --output output/images/private/home-network-layout.png --puppeteer-config-file scripts/puppeteer-config.json
 ```
 
 ## Role Split
@@ -60,6 +79,6 @@ layout:
 
 ## Current Limitations
 
-- `export-layout` は現時点では `.svg` のみ対応します。
+- `export-layout` は現時点では `.svg` と `.png` に対応します。
 - `home_lab` profile は固定テンプレートです。任意座標指定や複数 layout profile は今後の拡張候補です。
-- PNG が必要な場合は、生成した SVG を別ツールで PNG に変換します。
+- PNG 出力には Node.js と Puppeteer が必要です。Mermaid CLI を導入済みの環境では、その dependency tree の Puppeteer を再利用できます。
