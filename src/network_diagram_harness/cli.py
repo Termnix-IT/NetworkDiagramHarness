@@ -8,9 +8,10 @@ from .io import load_diagram, write_output
 from .export import export_directory_with_mermaid_cli, export_with_mermaid_cli
 from .mermaid import render_mermaid
 from .preview import render_markdown_preview
+from .svg import write_layout_svg
 
 
-COMMANDS = {"export", "export-all", "render", "validate", "preview"}
+COMMANDS = {"export", "export-all", "export-layout", "render", "validate", "preview"}
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -37,6 +38,10 @@ def main(argv: list[str] | None = None) -> None:
 
         if args.command == "export-all":
             run_export_all(args)
+            return
+
+        if args.command == "export-layout":
+            run_export_layout(args)
             return
     except (RuntimeError, ValueError) as error:
         print(f"error: {error}", file=sys.stderr)
@@ -130,6 +135,13 @@ def build_command_parser() -> argparse.ArgumentParser:
     export_all_parser.add_argument("--width", type=int, help="Output viewport width.")
     export_all_parser.add_argument("--height", type=int, help="Output viewport height.")
 
+    export_layout_parser = subparsers.add_parser(
+        "export-layout",
+        help="Export a human-oriented SVG layout from a YAML diagram definition.",
+    )
+    export_layout_parser.add_argument("input", type=Path)
+    export_layout_parser.add_argument("-o", "--output", type=Path, required=True)
+
     return parser
 
 
@@ -173,6 +185,11 @@ def run_export_all(args: argparse.Namespace) -> None:
     )
     for output_path in output_paths:
         print(f"Exported: {output_path}")
+
+
+def run_export_layout(args: argparse.Namespace) -> None:
+    diagram = load_diagram(args.input)
+    write_layout_svg(diagram, args.output)
 
 
 if __name__ == "__main__":

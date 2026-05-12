@@ -180,12 +180,15 @@ flowchart LR
 | `preview` | Mermaid code block を埋め込んだ Markdown を生成します。 |
 | `export` | Mermaid CLI を使って SVG/PNG/PDF を生成します。 |
 | `export-all` | ディレクトリ配下の `*.yml` をまとめて画像化します。 |
+| `export-layout` | 人間が見やすい固定配置 SVG を生成します。 |
 
 後方互換のため、`network-diagram-harness examples/simple-network.yml` も `render` と同じ動作をします。
 
 `export` には Mermaid CLI の `mmdc` が必要です。未導入の場合は `render` または `preview` を使って Mermaid を確認できます。
 
 画像出力の運用手順は [docs/image-export-workflow.md](docs/image-export-workflow.md) にまとめています。
+
+掲載向けの固定配置 SVG 出力は [docs/layout-workflow.md](docs/layout-workflow.md) にまとめています。
 
 自宅ネットワーク構成図を自分向けと公開向けに分けて育てる手順は [docs/profile-network-workflow.md](docs/profile-network-workflow.md) にまとめています。
 

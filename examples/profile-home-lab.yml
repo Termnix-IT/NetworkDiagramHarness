@@ -1,6 +1,9 @@
 title: Profile Home Lab Network
 direction: TB
 
+layout:
+  profile: home_lab
+
 zones:
   - id: internet
     name: Internet

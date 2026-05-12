@@ -31,6 +31,7 @@ $Diagrams = @(
         Preview = "output\home-network.md"
         Mermaid = "output\home-network.mmd"
         Image = "output\images\private\home-network.$Format"
+        LayoutImage = "output\images\private\home-network-layout.svg"
     },
     @{
         Name = "profile-home-lab"
@@ -39,6 +40,7 @@ $Diagrams = @(
         Preview = "docs\examples\profile-home-lab.md"
         Mermaid = "output\profile-home-lab.mmd"
         Image = "output\images\public\profile-home-lab.$Format"
+        LayoutImage = "output\images\public\profile-home-lab-layout.svg"
     }
 )
 
@@ -70,6 +72,10 @@ try {
             Write-Host "Writing image: $($Diagram.Image)"
             & $Harness export $Diagram.Source --output $Diagram.Image --mmdc $Mmdc --puppeteer-config-file $PuppeteerConfigFile --width $Width --height $Height
             if ($LASTEXITCODE -ne 0) { throw "Command failed: export $($Diagram.Source)" }
+
+            Write-Host "Writing layout image: $($Diagram.LayoutImage)"
+            & $Harness export-layout $Diagram.Source --output $Diagram.LayoutImage
+            if ($LASTEXITCODE -ne 0) { throw "Command failed: export-layout $($Diagram.Source)" }
         }
     }
 }

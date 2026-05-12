@@ -70,9 +70,11 @@ PDF:
 ```text
 output/images/private/home-network.png
 output/images/public/profile-home-lab.png
+output/images/private/home-network-layout.svg
+output/images/public/profile-home-lab-layout.svg
 ```
 
-専用スクリプトは既定で `1400x1000` の PNG を生成し、`scripts/puppeteer-config.json` を使って Mermaid CLI のブラウザ起動を安定させます。
+専用スクリプトは既定で `1400x1000` の PNG と、掲載向け固定配置 SVG を生成します。PNG 生成では `scripts/puppeteer-config.json` を使って Mermaid CLI のブラウザ起動を安定させます。
 
 SVG や PDF で出力する場合:
 
@@ -118,3 +120,13 @@ YAML
 ```
 
 最初から画像だけを見るのではなく、まず Markdown preview で構成を確認してから画像化します。
+
+## Human-Oriented Layout Export
+
+Mermaid の自動レイアウトではなく、人間が見やすい固定配置 SVG を出す場合は `export-layout` を使います。
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export-layout examples/profile-home-lab.yml --output output/images/public/profile-home-lab-layout.svg
+```
+
+詳細は [layout-workflow.md](layout-workflow.md) にまとめています。

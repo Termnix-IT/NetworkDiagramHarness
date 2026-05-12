@@ -14,6 +14,7 @@
 │   ├── current-state.md
 │   ├── folder-structure.md
 │   ├── image-export-workflow.md
+│   ├── layout-workflow.md
 │   ├── prompt-workflow.md
 │   ├── profile-network-workflow.md
 │   ├── schema.md
@@ -188,6 +189,7 @@ examples/<name>.yml
 - [prompt-workflow.md](prompt-workflow.md)
 - [profile-network-workflow.md](profile-network-workflow.md)
 - [image-export-workflow.md](image-export-workflow.md)
+- [layout-workflow.md](layout-workflow.md)
 - [schema.md](schema.md)
 - [current-state.md](current-state.md)
 - [specification.md](specification.md)

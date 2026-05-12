@@ -122,6 +122,34 @@ def test_export_all_command_uses_mermaid_cli(monkeypatch, capsys) -> None:
     assert f"Exported: {output_dir / 'diagram.svg'}" in capsys.readouterr().out
 
 
+def test_export_layout_command_writes_svg() -> None:
+    input_path = make_test_path("layout-diagram.yml")
+    output_path = make_test_path("layout.svg")
+    input_path.write_text(
+        "layout:\n"
+        "  profile: home_lab\n"
+        "nodes:\n"
+        "  - id: internet\n"
+        "    name: Internet\n"
+        "    type: external\n",
+        encoding="utf-8",
+    )
+
+    run_cli(
+        [
+            "network-diagram-harness",
+            "export-layout",
+            str(input_path),
+            "--output",
+            str(output_path),
+        ]
+    )
+
+    content = output_path.read_text(encoding="utf-8")
+    assert content.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+    assert "Internet" in content
+
+
 def test_cli_reports_validation_errors_without_traceback(capsys) -> None:
     input_path = make_test_path("invalid-diagram.yml")
     input_path.write_text(

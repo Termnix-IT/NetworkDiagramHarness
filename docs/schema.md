@@ -9,6 +9,8 @@
 ```yaml
 title: Web Three Tier Network
 direction: LR
+layout:
+  profile: home_lab
 zones: []
 nodes: []
 connections: []
@@ -18,9 +20,29 @@ connections: []
 | --- | --- | --- | --- | --- |
 | `title` | no | string | `null` | 図のタイトル。Mermaid ではコメントとして出力します。 |
 | `direction` | no | string | `LR` | Mermaid flowchart の向きです。 |
+| `layout` | no | object | `{}` | 掲載向け SVG など、人間向け画像出力の layout 設定です。 |
 | `zones` | no | array | `[]` | ネットワーク領域やセグメントの一覧です。 |
 | `nodes` | no | array | `[]` | サーバ、DB、Firewall などの構成要素です。 |
 | `connections` | no | array | `[]` | node 間の接続情報です。 |
+
+## Layout
+
+`layout` は Mermaid ではなく、掲載向け SVG などの人間向け画像出力で使います。
+
+```yaml
+layout:
+  profile: home_lab
+```
+
+| Field | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `profile` | no | string | `null` | 人間向け layout template の名前です。 |
+
+許可値:
+
+| Value | Meaning |
+| --- | --- |
+| `home_lab` | 自宅ネットワーク / home lab 向けの固定配置 template です。Internet, Cloud, Edge, DMZ, Internal, VLAN 系の領域を見やすく配置します。 |
 
 ## Direction
 
@@ -190,6 +212,7 @@ source -->|"HTTPS / 443 / public access"| target
 現時点の parser は以下を検証します。
 
 - `direction` は `TB`, `TD`, `BT`, `RL`, `LR` のみ許可
+- `layout.profile` は未指定または `home_lab` のみ許可
 - `zone.id` の重複はエラー
 - `node.id` の重複はエラー
 - `node.zone` は既存 `zone.id` のみ許可
@@ -297,6 +320,7 @@ connections:
 - protocol allowlist
 - IP address classification
 - output profiles
+- layout profiles
 - JSON Schema export
 
 ## Mermaid Styling

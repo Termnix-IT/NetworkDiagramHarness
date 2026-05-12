@@ -17,7 +17,13 @@ ALLOWED_NODE_TYPES = {
     "subnet",
 }
 ALLOWED_CONNECTION_DIRECTIONS = {"outbound", "inbound", "bidirectional"}
+ALLOWED_LAYOUT_PROFILES = {"home_lab"}
 PROTOCOL_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+._-]*$")
+
+
+@dataclass(frozen=True)
+class Layout:
+    profile: str | None = None
 
 
 @dataclass(frozen=True)
@@ -54,6 +60,7 @@ class Connection:
 class Diagram:
     title: str | None
     direction: str
+    layout: Layout
     zones: list[Zone]
     nodes: list[Node]
     connections: list[Connection]
@@ -103,6 +110,7 @@ def parse_diagram(data: dict[str, Any]) -> Diagram:
     diagram = Diagram(
         title=str(data["title"]) if data.get("title") else None,
         direction=str(data.get("direction", "LR")),
+        layout=parse_layout(data.get("layout")),
         zones=zones,
         nodes=nodes,
         connections=connections,
@@ -111,9 +119,20 @@ def parse_diagram(data: dict[str, Any]) -> Diagram:
     return diagram
 
 
+def parse_layout(value: Any) -> Layout:
+    if value is None:
+        return Layout()
+    if not isinstance(value, dict):
+        raise ValueError("layout must be a mapping")
+    profile = value.get("profile")
+    return Layout(profile=str(profile) if profile is not None else None)
+
+
 def validate_diagram(diagram: Diagram) -> None:
     if diagram.direction not in ALLOWED_DIRECTIONS:
         raise ValueError(f"Unsupported Mermaid direction: {diagram.direction}")
+    if diagram.layout.profile and diagram.layout.profile not in ALLOWED_LAYOUT_PROFILES:
+        raise ValueError(f"Unsupported layout profile: {diagram.layout.profile}")
 
     zone_ids = [zone.id for zone in diagram.zones]
     duplicated_zones = sorted(
