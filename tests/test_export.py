@@ -62,3 +62,30 @@ def test_export_directory_exports_each_yaml(monkeypatch) -> None:
 
     assert output_paths == [output_dir / "one.svg", output_dir / "two.svg"]
     assert len(calls) == 2
+
+
+def test_export_passes_puppeteer_config_file(monkeypatch) -> None:
+    diagram = parse_diagram({"nodes": [{"id": "web", "name": "Web Server"}]})
+    calls = []
+
+    def fake_run(command, check):
+        calls.append((command, check))
+
+    monkeypatch.setattr("network_diagram_harness.export.subprocess.run", fake_run)
+
+    export_with_mermaid_cli(
+        diagram,
+        TEST_DIR / "diagram.png",
+        puppeteer_config_file=Path("scripts/puppeteer-config.json"),
+        width=1400,
+        height=1000,
+    )
+
+    command, check = calls[0]
+    assert check is True
+    assert "--puppeteerConfigFile" in command
+    assert "scripts\\puppeteer-config.json" in command or "scripts/puppeteer-config.json" in command
+    assert "--width" in command
+    assert "1400" in command
+    assert "--height" in command
+    assert "1000" in command

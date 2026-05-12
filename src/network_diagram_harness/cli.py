@@ -97,6 +97,13 @@ def build_command_parser() -> argparse.ArgumentParser:
         default="mmdc",
         help="Mermaid CLI executable. Defaults to mmdc.",
     )
+    export_parser.add_argument(
+        "--puppeteer-config-file",
+        type=Path,
+        help="Puppeteer JSON config file passed to Mermaid CLI.",
+    )
+    export_parser.add_argument("--width", type=int, help="Output viewport width.")
+    export_parser.add_argument("--height", type=int, help="Output viewport height.")
 
     export_all_parser = subparsers.add_parser(
         "export-all",
@@ -115,6 +122,13 @@ def build_command_parser() -> argparse.ArgumentParser:
         default="mmdc",
         help="Mermaid CLI executable. Defaults to mmdc.",
     )
+    export_all_parser.add_argument(
+        "--puppeteer-config-file",
+        type=Path,
+        help="Puppeteer JSON config file passed to Mermaid CLI.",
+    )
+    export_all_parser.add_argument("--width", type=int, help="Output viewport width.")
+    export_all_parser.add_argument("--height", type=int, help="Output viewport height.")
 
     return parser
 
@@ -137,7 +151,14 @@ def run_preview(args: argparse.Namespace) -> None:
 
 def run_export(args: argparse.Namespace) -> None:
     diagram = load_diagram(args.input)
-    export_with_mermaid_cli(diagram, args.output, args.mmdc)
+    export_with_mermaid_cli(
+        diagram,
+        args.output,
+        args.mmdc,
+        args.puppeteer_config_file,
+        args.width,
+        args.height,
+    )
 
 
 def run_export_all(args: argparse.Namespace) -> None:
@@ -146,6 +167,9 @@ def run_export_all(args: argparse.Namespace) -> None:
         args.output_dir,
         args.format,
         args.mmdc,
+        args.puppeteer_config_file,
+        args.width,
+        args.height,
     )
     for output_path in output_paths:
         print(f"Exported: {output_path}")

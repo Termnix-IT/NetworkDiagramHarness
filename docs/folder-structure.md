@@ -15,10 +15,12 @@
 │   ├── folder-structure.md
 │   ├── image-export-workflow.md
 │   ├── prompt-workflow.md
+│   ├── profile-network-workflow.md
 │   ├── schema.md
 │   └── specification.md
 ├── examples/
 ├── prompts/
+├── scripts/
 ├── src/
 │   └── network_diagram_harness/
 ├── tests/
@@ -41,6 +43,7 @@ Git 管理する公開対象のディレクトリです。
 | `docs/examples/` | `examples/*.yml` から生成した Markdown preview です。 |
 | `examples/` | 公開可能な架空ネットワーク構成 YAML です。 |
 | `prompts/` | Codex へ依頼するときのプロンプト雛形です。 |
+| `scripts/` | ローカル運用や画像出力の補助スクリプトです。 |
 | `src/network_diagram_harness/` | ハーネス本体の Python パッケージです。 |
 | `tests/` | pytest によるテストです。 |
 
@@ -84,6 +87,7 @@ src/network_diagram_harness/
 examples/
 ├── multi-zone-network.yml
 ├── office-and-cloud.yml
+├── profile-home-lab.yml
 ├── simple-network.yml
 ├── web-three-tier.yml
 └── zero-trust-access.yml
@@ -97,10 +101,22 @@ examples/
 docs/examples/
 ├── multi-zone-network.md
 ├── office-and-cloud.md
+├── profile-home-lab.md
 ├── simple-network.md
 ├── web-three-tier.md
 └── zero-trust-access.md
 ```
+
+## Scripts
+
+```text
+scripts/
+└── export-profile-images.ps1
+```
+
+| Path | Role |
+| --- | --- |
+| `scripts/export-profile-images.ps1` | 自宅ネットワーク構成図の自分向け・公開向け画像をまとめて出力します。 |
 
 ## Local And Private Directories
 
@@ -170,6 +186,7 @@ examples/<name>.yml
 ## Related Docs
 
 - [prompt-workflow.md](prompt-workflow.md)
+- [profile-network-workflow.md](profile-network-workflow.md)
 - [image-export-workflow.md](image-export-workflow.md)
 - [schema.md](schema.md)
 - [current-state.md](current-state.md)

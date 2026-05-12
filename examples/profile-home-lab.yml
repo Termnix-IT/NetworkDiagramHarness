@@ -1,0 +1,140 @@
+title: Profile Home Lab Network
+direction: TB
+
+zones:
+  - id: internet
+    name: Internet
+
+  - id: home_edge
+    name: Home Edge
+
+  - id: dmz
+    name: Home Lab Service Zone
+
+  - id: internal
+    name: Segmented Internal Network
+
+  - id: cloud
+    name: Cloud Hosting
+
+nodes:
+  - id: internet
+    name: Internet
+    type: external
+    zone: internet
+
+  - id: isp_edge
+    name: ISP Access
+    type: external
+    zone: internet
+    role: fiber connection / dynamic DNS
+
+  - id: edge_router
+    name: Edge Router
+    type: firewall
+    zone: home_edge
+    role: NAT / firewall / home edge
+
+  - id: lab_service_host
+    name: Lab Service Host
+    type: server
+    zone: dmz
+    role: self-hosted lab services
+
+  - id: internal_router
+    name: Internal Router
+    type: firewall
+    zone: internal
+    role: VLAN / ACL / monitoring
+
+  - id: client_segment
+    name: Client Segment
+    type: subnet
+    zone: internal
+    role: daily-use devices
+
+  - id: server_segment
+    name: Server Segment
+    type: subnet
+    zone: internal
+    role: lab services
+
+  - id: wifi_segment
+    name: Wi-Fi Segment
+    type: subnet
+    zone: internal
+    role: wireless clients
+
+  - id: test_segment
+    name: Test Segment
+    type: subnet
+    zone: internal
+    role: isolated experiments
+
+  - id: monitoring_server
+    name: Monitoring Server
+    type: server
+    zone: internal
+    role: metrics / file service
+
+  - id: cdn
+    name: CDN
+    type: load_balancer
+    zone: cloud
+    role: public website delivery
+
+  - id: object_storage
+    name: Object Storage
+    type: database
+    zone: cloud
+    role: static website origin
+
+connections:
+  - source: internet
+    target: isp_edge
+    label: fiber internet
+
+  - source: isp_edge
+    target: edge_router
+    label: WAN
+
+  - source: edge_router
+    target: lab_service_host
+    label: home lab access
+
+  - source: edge_router
+    target: internal_router
+    label: internal uplink
+
+  - source: internal_router
+    target: client_segment
+    label: client VLAN
+
+  - source: internal_router
+    target: server_segment
+    label: server VLAN
+
+  - source: internal_router
+    target: wifi_segment
+    label: Wi-Fi VLAN
+
+  - source: internal_router
+    target: test_segment
+    label: test VLAN
+
+  - source: monitoring_server
+    target: internal_router
+    label: network monitoring
+
+  - source: monitoring_server
+    target: lab_service_host
+    label: host monitoring
+
+  - source: internet
+    target: cdn
+    protocol: HTTPS
+    port: 443
+
+  - source: cdn
+    target: object_storage
+    label: origin

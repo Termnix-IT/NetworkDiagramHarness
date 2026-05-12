@@ -31,6 +31,12 @@ PNG:
 .\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --output output/images/web-three-tier.png
 ```
 
+読みやすい大きさで PNG を出す場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --output output/images/web-three-tier.png --width 1400 --height 1000
+```
+
 PDF:
 
 ```powershell
@@ -51,12 +57,54 @@ PDF:
 .\.venv\Scripts\network-diagram-harness.exe export-all local --output-dir output/local-images --format png
 ```
 
+## Profile Image Export
+
+自宅ネットワーク構成図は、自分向けと公開向けを分けて画像出力します。
+
+```powershell
+.\scripts\export-profile-images.ps1
+```
+
+既定では以下の PNG を生成します。
+
+```text
+output/images/private/home-network.png
+output/images/public/profile-home-lab.png
+```
+
+専用スクリプトは既定で `1400x1000` の PNG を生成し、`scripts/puppeteer-config.json` を使って Mermaid CLI のブラウザ起動を安定させます。
+
+SVG や PDF で出力する場合:
+
+```powershell
+.\scripts\export-profile-images.ps1 -Format svg
+.\scripts\export-profile-images.ps1 -Format pdf
+```
+
+サイズを変える場合:
+
+```powershell
+.\scripts\export-profile-images.ps1 -Width 1600 -Height 1200
+```
+
+画像出力には `mmdc` が必要です。`mmdc` がまだ使えない場合でも、以下で YAML validation、Markdown preview、Mermaid 生成だけを更新できます。
+
+```powershell
+.\scripts\export-profile-images.ps1 -SkipImageExport
+```
+
 ## Custom Mermaid CLI Path
 
 `mmdc` が PATH にない場合は、`--mmdc` で指定できます。
 
 ```powershell
 .\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --output output/images/web-three-tier.svg --mmdc C:\path\to\mmdc.cmd
+```
+
+Puppeteer 設定を指定する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --output output/images/web-three-tier.png --puppeteer-config-file scripts/puppeteer-config.json
 ```
 
 ## Recommended Harness Flow

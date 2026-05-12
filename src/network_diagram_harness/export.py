@@ -15,6 +15,9 @@ def export_with_mermaid_cli(
     diagram: Diagram,
     output_path: Path,
     mmdc_command: str = "mmdc",
+    puppeteer_config_file: Path | None = None,
+    width: int | None = None,
+    height: int | None = None,
 ) -> None:
     suffix = output_path.suffix.lower()
     if suffix not in SUPPORTED_EXPORT_FORMATS:
@@ -25,17 +28,22 @@ def export_with_mermaid_cli(
     temp_input = output_path.with_suffix(f"{output_path.suffix}.mmd")
     temp_input.write_text(render_mermaid(diagram), encoding="utf-8")
 
+    command = [
+        mmdc_command,
+        "--input",
+        str(temp_input),
+        "--output",
+        str(output_path),
+    ]
+    if puppeteer_config_file is not None:
+        command.extend(["--puppeteerConfigFile", str(puppeteer_config_file)])
+    if width is not None:
+        command.extend(["--width", str(width)])
+    if height is not None:
+        command.extend(["--height", str(height)])
+
     try:
-        subprocess.run(
-            [
-                mmdc_command,
-                "--input",
-                str(temp_input),
-                "--output",
-                str(output_path),
-            ],
-            check=True,
-        )
+        subprocess.run(command, check=True)
     except FileNotFoundError as error:
         raise RuntimeError(
             "Mermaid CLI executable was not found. Install @mermaid-js/mermaid-cli "
@@ -50,6 +58,9 @@ def export_directory_with_mermaid_cli(
     output_dir: Path,
     image_format: str = "svg",
     mmdc_command: str = "mmdc",
+    puppeteer_config_file: Path | None = None,
+    width: int | None = None,
+    height: int | None = None,
 ) -> list[Path]:
     suffix = normalize_export_suffix(image_format)
     if suffix not in SUPPORTED_EXPORT_FORMATS:
@@ -65,7 +76,14 @@ def export_directory_with_mermaid_cli(
     for input_path in sorted(input_dir.glob("*.yml")):
         diagram = load_diagram(input_path)
         output_path = output_dir / f"{input_path.stem}{suffix}"
-        export_with_mermaid_cli(diagram, output_path, mmdc_command)
+        export_with_mermaid_cli(
+            diagram,
+            output_path,
+            mmdc_command,
+            puppeteer_config_file,
+            width,
+            height,
+        )
         output_paths.append(output_path)
 
     return output_paths

@@ -101,6 +101,7 @@ network-diagram-harness export examples/web-three-tier.yml --output output/web-t
 | `examples/web-three-tier.yml` | Internet / DMZ / App / DB の three-tier 構成 |
 | `examples/multi-zone-network.yml` | Edge, DMZ, App, Data, Observability を含む複数 zone 構成 |
 | `examples/office-and-cloud.yml` | Office network と cloud segment の接続例 |
+| `examples/profile-home-lab.yml` | 経歴ページ掲載向けに抽象化した home lab 構成 |
 | `examples/zero-trust-access.yml` | Identity layer と access gateway を含む zero trust 例 |
 
 Markdown プレビューは `docs/examples/` に生成済みです。
@@ -185,6 +186,14 @@ flowchart LR
 `export` には Mermaid CLI の `mmdc` が必要です。未導入の場合は `render` または `preview` を使って Mermaid を確認できます。
 
 画像出力の運用手順は [docs/image-export-workflow.md](docs/image-export-workflow.md) にまとめています。
+
+自宅ネットワーク構成図を自分向けと公開向けに分けて育てる手順は [docs/profile-network-workflow.md](docs/profile-network-workflow.md) にまとめています。
+
+自宅ネットワーク構成図の自分向け・公開向け画像をまとめて更新する場合:
+
+```powershell
+.\scripts\export-profile-images.ps1
+```
 
 ## Preview Document
 
