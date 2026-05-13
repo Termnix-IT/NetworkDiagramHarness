@@ -24,6 +24,7 @@
 ├── scripts/
 ├── src/
 │   └── network_diagram_harness/
+│       └── renderers/
 ├── tests/
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
@@ -70,7 +71,13 @@ src/network_diagram_harness/
 ├── io.py
 ├── mermaid.py
 ├── model.py
-└── preview.py
+├── preview.py
+├── svg.py
+└── renderers/
+    ├── __init__.py
+    ├── base.py
+    ├── graphviz.py
+    └── mermaid.py
 ```
 
 | Path | Role |
@@ -79,8 +86,10 @@ src/network_diagram_harness/
 | `model.py` | YAML から内部モデルを作り、validation を行います。 |
 | `mermaid.py` | 内部モデルから Mermaid flowchart を生成します。 |
 | `preview.py` | Mermaid code block を含む Markdown preview を生成します。 |
-| `export.py` | Mermaid CLI を使って SVG/PNG/PDF を出力します。 |
+| `export.py` | Mermaid CLI または Graphviz を使って SVG/PNG/PDF を出力します。 |
 | `io.py` | YAML 読み込みとファイル出力の共通処理です。 |
+| `svg.py` | `layout.profile` に基づく固定配置 SVG/PNG を生成します。 |
+| `renderers/` | Mermaid, Graphviz などの renderer 実装と registry です。 |
 
 ## Public Examples
 
@@ -134,7 +143,7 @@ workspaces/
 | --- | --- |
 | `local/` | ローカル検証用の YAML を置きます。例: `local/test-network.local.yml` |
 | `private/` | 実構成や公開したくない構成を置きます。 |
-| `output/` | Mermaid、Markdown preview、SVG/PNG/PDF などの生成物を置きます。 |
+| `output/` | Mermaid、Graphviz DOT、Markdown preview、SVG/PNG/PDF などの生成物を置きます。 |
 | `workspaces/` | 将来的な作業用領域です。 |
 
 ## Temporary Directories
@@ -164,7 +173,7 @@ build/
 | サンプルの Markdown preview | `docs/examples/` | yes |
 | ローカル検証用 YAML | `local/` | no |
 | 実構成 YAML | `private/` | no |
-| Mermaid / Markdown / 画像生成物 | `output/` | no |
+| Mermaid / Graphviz DOT / Markdown / 画像生成物 | `output/` | no |
 | Codex 依頼テンプレート | `prompts/` | yes |
 
 ## Common Workflow Paths

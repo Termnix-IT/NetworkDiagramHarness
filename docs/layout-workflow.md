@@ -73,8 +73,8 @@ layout:
 | Output | Role |
 | --- | --- |
 | `preview` | Markdown 上で Mermaid を確認するための出力 |
-| `render` | Mermaid source を確認・保存するための出力 |
-| `export` | Mermaid CLI で SVG / PNG / PDF に変換する出力 |
+| `render` | Mermaid または Graphviz source を確認・保存するための出力 |
+| `export` | Mermaid CLI または Graphviz で SVG / PNG / PDF に変換する出力 |
 | `export-layout` | 掲載向けの固定配置 SVG 出力 |
 
 ## Current Limitations

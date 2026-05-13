@@ -11,6 +11,7 @@ user prompt
   -> harness preview
   -> user reviews Mermaid preview
   -> Codex updates YAML if needed
+  -> optional image export with Mermaid or Graphviz
 ```
 
 ## Where To Put Files
@@ -129,10 +130,26 @@ Mermaid CLI が使える場合:
 .\.venv\Scripts\network-diagram-harness.exe export local/<name>.local.yml --output output/<name>.svg
 ```
 
+Graphviz が使える場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe render local/<name>.local.yml --renderer graphviz --output output/<name>.dot
+```
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export local/<name>.local.yml --renderer graphviz --output output/<name>.svg
+```
+
 複数ファイルをまとめて画像化する場合:
 
 ```powershell
 .\.venv\Scripts\network-diagram-harness.exe export-all local --output-dir output/images --format svg
+```
+
+Graphviz renderer でまとめて画像化する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export-all local --renderer graphviz --output-dir output/images --format svg
 ```
 
 ## Codex Operating Rules
@@ -147,6 +164,7 @@ Codex は以下の順序で作業します。
 6. validation error があれば YAML を修正する
 7. `preview` を実行する
 8. 出力 Markdown の場所を報告する
+9. 画像出力が必要な場合は `export` を実行する。見た目重視なら `--renderer graphviz` を優先する
 
 ## Review Points
 

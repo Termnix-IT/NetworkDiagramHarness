@@ -2,7 +2,7 @@
 
 このドキュメントは、現時点のハーネス設定とサンプル構成図を確認するための簡易プレビューです。
 
-GitHub や Mermaid 対応の Markdown viewer では、下部の `mermaid` ブロックが図として表示されます。画像出力を作る前の確認用として使います。
+GitHub や Mermaid 対応の Markdown viewer では、下部の `mermaid` ブロックが図として表示されます。画像出力を作る前の確認用として使います。画像出力では Mermaid renderer と Graphviz renderer を選べます。
 
 ## Harness Settings
 
@@ -14,7 +14,7 @@ GitHub や Mermaid 対応の Markdown viewer では、下部の `mermaid` ブロ
 | Dependency | `PyYAML>=6.0` |
 | Test dependency | `pytest>=8.0` |
 | Input format | `YAML` |
-| Current output format | `Mermaid flowchart` |
+| Current output format | `Mermaid flowchart`, `Graphviz DOT`, `SVG/PNG/PDF` |
 | CLI command | `network-diagram-harness` |
 
 ## Public Repository Policy
@@ -28,6 +28,7 @@ GitHub や Mermaid 対応の Markdown viewer では、下部の `mermaid` ブロ
 - ドキュメント
 - 架空のサンプル構成
 - 公開してよい Mermaid プレビュー
+- 公開してよい Graphviz DOT / 画像出力
 
 管理対象に入れないもの:
 
@@ -83,7 +84,7 @@ connections:
     direction: outbound | inbound | bidirectional
 ```
 
-`label` は後方互換用です。`label` がない場合は `protocol`, `port`, `purpose` から Mermaid の接続ラベルを生成します。
+`label` は後方互換用です。`label` がない場合は `protocol`, `port`, `purpose` から renderer の接続ラベルを生成します。
 
 ## Supported Node Types
 
@@ -264,16 +265,34 @@ Mermaid のみを出力する場合:
 .\.venv\Scripts\network-diagram-harness.exe render examples/web-three-tier.yml --output output/web-three-tier.mmd
 ```
 
+Graphviz DOT を出力する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe render examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.dot
+```
+
 Mermaid CLI が入っている環境で画像出力する場合:
 
 ```powershell
 .\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --output output/web-three-tier.svg
 ```
 
+Graphviz が入っている環境で画像出力する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.svg
+```
+
 複数 YAML をまとめて画像出力する場合:
 
 ```powershell
 .\.venv\Scripts\network-diagram-harness.exe export-all examples --output-dir output/images --format svg
+```
+
+Graphviz renderer でまとめて画像出力する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export-all examples --renderer graphviz --output-dir output/images --format svg
 ```
 
 画像出力の詳しい運用は [image-export-workflow.md](image-export-workflow.md) にあります。
@@ -322,7 +341,7 @@ flowchart LR
 
 ## Current Validation Rules
 
-- `direction` は Mermaid の `TB`, `TD`, `BT`, `RL`, `LR` のみ許可
+- `direction` は `TB`, `TD`, `BT`, `RL`, `LR` のみ許可
 - `zone.id` の重複はエラー
 - `node.id` の重複はエラー
 - `node.zone` は既存 `zone.id` のみ許可
@@ -337,3 +356,4 @@ flowchart LR
 - `node.name` が未指定の場合は `node.id` を表示名として使う
 - `node.type` が未指定の場合は `server` として扱う
 - Mermaid 出力では使用された `node.type` ごとに `classDef` と `class` を出力
+- Graphviz 出力では `zones` を `cluster`、`connections` を edge として出力
