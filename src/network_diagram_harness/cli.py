@@ -5,9 +5,12 @@ import sys
 from pathlib import Path
 
 from .io import load_diagram, write_output
-from .export import export_directory_with_mermaid_cli, export_with_mermaid_cli
-from .mermaid import render_mermaid
+from .export import (
+    export_diagram,
+    export_directory,
+)
 from .preview import render_markdown_preview
+from .renderers import get_renderer, renderer_names
 from .svg import export_layout
 
 
@@ -73,10 +76,16 @@ def build_command_parser() -> argparse.ArgumentParser:
 
     render_parser = subparsers.add_parser(
         "render",
-        help="Render a YAML diagram definition to Mermaid.",
+        help="Render a YAML diagram definition to a renderer source file.",
     )
     render_parser.add_argument("input", type=Path)
     render_parser.add_argument("-o", "--output", type=Path)
+    render_parser.add_argument(
+        "--renderer",
+        choices=renderer_names(),
+        default="mermaid",
+        help="Renderer source format to generate. Defaults to mermaid.",
+    )
 
     validate_parser = subparsers.add_parser(
         "validate",
@@ -93,14 +102,25 @@ def build_command_parser() -> argparse.ArgumentParser:
 
     export_parser = subparsers.add_parser(
         "export",
-        help="Export a diagram to SVG, PNG, or PDF using Mermaid CLI.",
+        help="Export a diagram to SVG, PNG, or PDF.",
     )
     export_parser.add_argument("input", type=Path)
     export_parser.add_argument("-o", "--output", type=Path, required=True)
     export_parser.add_argument(
+        "--renderer",
+        choices=renderer_names(),
+        default="mermaid",
+        help="Renderer used for image export. Defaults to mermaid.",
+    )
+    export_parser.add_argument(
         "--mmdc",
         default="mmdc",
         help="Mermaid CLI executable. Defaults to mmdc.",
+    )
+    export_parser.add_argument(
+        "--dot",
+        default="dot",
+        help="Graphviz dot executable. Defaults to dot.",
     )
     export_parser.add_argument(
         "--puppeteer-config-file",
@@ -117,6 +137,12 @@ def build_command_parser() -> argparse.ArgumentParser:
     export_all_parser.add_argument("input_dir", type=Path)
     export_all_parser.add_argument("-o", "--output-dir", type=Path, required=True)
     export_all_parser.add_argument(
+        "--renderer",
+        choices=renderer_names(),
+        default="mermaid",
+        help="Renderer used for image export. Defaults to mermaid.",
+    )
+    export_all_parser.add_argument(
         "--format",
         default="svg",
         choices=["svg", "png", "pdf"],
@@ -126,6 +152,11 @@ def build_command_parser() -> argparse.ArgumentParser:
         "--mmdc",
         default="mmdc",
         help="Mermaid CLI executable. Defaults to mmdc.",
+    )
+    export_all_parser.add_argument(
+        "--dot",
+        default="dot",
+        help="Graphviz dot executable. Defaults to dot.",
     )
     export_all_parser.add_argument(
         "--puppeteer-config-file",
@@ -157,7 +188,8 @@ def build_command_parser() -> argparse.ArgumentParser:
 
 def run_render(args: argparse.Namespace) -> None:
     diagram = load_diagram(args.input)
-    write_output(render_mermaid(diagram), args.output)
+    renderer = get_renderer(getattr(args, "renderer", "mermaid"))
+    write_output(renderer.render_source(diagram), args.output)
 
 
 def run_validate(args: argparse.Namespace) -> None:
@@ -173,25 +205,29 @@ def run_preview(args: argparse.Namespace) -> None:
 
 def run_export(args: argparse.Namespace) -> None:
     diagram = load_diagram(args.input)
-    export_with_mermaid_cli(
+    export_diagram(
         diagram,
         args.output,
-        args.mmdc,
-        args.puppeteer_config_file,
-        args.width,
-        args.height,
+        renderer=args.renderer,
+        mmdc_command=args.mmdc,
+        dot_command=args.dot,
+        puppeteer_config_file=args.puppeteer_config_file,
+        width=args.width,
+        height=args.height,
     )
 
 
 def run_export_all(args: argparse.Namespace) -> None:
-    output_paths = export_directory_with_mermaid_cli(
+    output_paths = export_directory(
         args.input_dir,
         args.output_dir,
-        args.format,
-        args.mmdc,
-        args.puppeteer_config_file,
-        args.width,
-        args.height,
+        renderer=args.renderer,
+        image_format=args.format,
+        mmdc_command=args.mmdc,
+        dot_command=args.dot,
+        puppeteer_config_file=args.puppeteer_config_file,
+        width=args.width,
+        height=args.height,
     )
     for output_path in output_paths:
         print(f"Exported: {output_path}")

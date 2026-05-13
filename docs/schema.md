@@ -337,6 +337,18 @@ class web01,web02 type_server
 
 現時点の色は renderer 側の固定値です。YAML から style を指定する仕組みはまだ正式仕様ではありません。
 
+## Graphviz Styling
+
+Graphviz renderer は `zones` を `cluster` として出力し、`nodes[].type` ごとに `shape`, `fillcolor`, `color` を変えます。
+
+`connections` は Graphviz の edge として出力されます。`direction: inbound` は edge の向きを反転し、`direction: bidirectional` は `dir=both` を指定します。
+
+```powershell
+network-diagram-harness render examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.dot
+```
+
+現時点の色、形、cluster style は renderer 側の固定値です。YAML から Graphviz style を直接指定する仕組みはまだ正式仕様ではありません。
+
 ## Image Export
 
 画像出力は YAML schema ではなく CLI の責務です。
@@ -345,4 +357,10 @@ class web01,web02 type_server
 network-diagram-harness export examples/web-three-tier.yml --output output/web-three-tier.svg
 ```
 
-`export` は Mermaid CLI の `mmdc` を呼び出します。対応拡張子は `.svg`, `.png`, `.pdf` です。
+既定の `export` は Mermaid CLI の `mmdc` を呼び出します。Graphviz renderer を使う場合は `--renderer graphviz` を指定します。
+
+```powershell
+network-diagram-harness export examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.svg
+```
+
+対応拡張子は `.svg`, `.png`, `.pdf` です。

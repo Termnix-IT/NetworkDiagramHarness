@@ -58,6 +58,30 @@ def test_legacy_render_command_still_works(capsys) -> None:
     assert 'web["Web Server"]' in capsys.readouterr().out
 
 
+def test_render_command_can_write_graphviz_dot(capsys) -> None:
+    input_path = make_test_path("graphviz-render-diagram.yml")
+    input_path.write_text(
+        "nodes:\n"
+        "  - id: web\n"
+        "    name: Web Server\n",
+        encoding="utf-8",
+    )
+
+    run_cli(
+        [
+            "network-diagram-harness",
+            "render",
+            str(input_path),
+            "--renderer",
+            "graphviz",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert output.startswith("digraph network_diagram {\n")
+    assert 'web [label="Web Server", shape="box"' in output
+
+
 def test_export_command_uses_mermaid_cli(monkeypatch) -> None:
     input_path = make_test_path("export-diagram.yml")
     output_path = make_test_path("export.svg")
@@ -86,6 +110,40 @@ def test_export_command_uses_mermaid_cli(monkeypatch) -> None:
 
     assert calls
     assert calls[0][0][0] == "mmdc"
+    assert calls[0][1] is True
+
+
+def test_export_command_can_use_graphviz(monkeypatch) -> None:
+    input_path = make_test_path("graphviz-export-diagram.yml")
+    output_path = make_test_path("graphviz-export.svg")
+    input_path.write_text(
+        "nodes:\n"
+        "  - id: web\n"
+        "    name: Web Server\n",
+        encoding="utf-8",
+    )
+    calls = []
+
+    def fake_run(command, check):
+        calls.append((command, check))
+
+    monkeypatch.setattr("network_diagram_harness.export.subprocess.run", fake_run)
+
+    run_cli(
+        [
+            "network-diagram-harness",
+            "export",
+            str(input_path),
+            "--output",
+            str(output_path),
+            "--renderer",
+            "graphviz",
+        ]
+    )
+
+    assert calls
+    assert calls[0][0][0] == "dot"
+    assert "-Tsvg" in calls[0][0]
     assert calls[0][1] is True
 
 
@@ -120,6 +178,43 @@ def test_export_all_command_uses_mermaid_cli(monkeypatch, capsys) -> None:
 
     assert calls
     assert f"Exported: {output_dir / 'diagram.svg'}" in capsys.readouterr().out
+
+
+def test_export_all_command_can_use_graphviz(monkeypatch, capsys) -> None:
+    input_dir = make_test_path("graphviz-export-all-input")
+    output_dir = make_test_path("graphviz-export-all-output")
+    input_dir.mkdir(parents=True, exist_ok=True)
+    (input_dir / "diagram.yml").write_text(
+        "nodes:\n"
+        "  - id: web\n"
+        "    name: Web Server\n",
+        encoding="utf-8",
+    )
+    calls = []
+
+    def fake_run(command, check):
+        calls.append((command, check))
+
+    monkeypatch.setattr("network_diagram_harness.export.subprocess.run", fake_run)
+
+    run_cli(
+        [
+            "network-diagram-harness",
+            "export-all",
+            str(input_dir),
+            "--output-dir",
+            str(output_dir),
+            "--format",
+            "png",
+            "--renderer",
+            "graphviz",
+        ]
+    )
+
+    assert calls
+    assert calls[0][0][0] == "dot"
+    assert "-Tpng" in calls[0][0]
+    assert f"Exported: {output_dir / 'diagram.png'}" in capsys.readouterr().out
 
 
 def test_export_layout_command_writes_svg() -> None:
