@@ -145,7 +145,7 @@ def build_command_parser() -> argparse.ArgumentParser:
     export_all_parser.add_argument(
         "--format",
         default="svg",
-        choices=["svg", "png", "pdf"],
+        choices=["svg", "png", "pdf", "html"],
         help="Image format to generate. Defaults to svg.",
     )
     export_all_parser.add_argument(

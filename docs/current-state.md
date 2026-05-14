@@ -2,7 +2,7 @@
 
 このドキュメントは、現時点のハーネス設定とサンプル構成図を確認するための簡易プレビューです。
 
-GitHub や Mermaid 対応の Markdown viewer では、下部の `mermaid` ブロックが図として表示されます。画像出力を作る前の確認用として使います。画像出力では Mermaid renderer と Graphviz renderer を選べます。
+GitHub や Mermaid 対応の Markdown viewer では、下部の `mermaid` ブロックが図として表示されます。画像出力を作る前の確認用として使います。画像出力では Mermaid, Graphviz, drawsvg, pyvis renderer を選べます。
 
 ## Harness Settings
 
@@ -14,7 +14,7 @@ GitHub や Mermaid 対応の Markdown viewer では、下部の `mermaid` ブロ
 | Dependency | `PyYAML>=6.0` |
 | Test dependency | `pytest>=8.0` |
 | Input format | `YAML` |
-| Current output format | `Mermaid flowchart`, `Graphviz DOT`, `SVG/PNG/PDF` |
+| Current output format | `Mermaid flowchart`, `Graphviz DOT`, `SVG/PNG/PDF`, `HTML` |
 | CLI command | `network-diagram-harness` |
 
 ## Public Repository Policy
@@ -283,6 +283,18 @@ Graphviz が入っている環境で画像出力する場合:
 .\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.svg
 ```
 
+追加外部コマンドなしで静的 SVG を出力する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --renderer drawsvg --output output/web-three-tier-drawsvg.svg
+```
+
+インタラクティブ HTML を出力する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --renderer pyvis --output output/web-three-tier.html
+```
+
 複数 YAML をまとめて画像出力する場合:
 
 ```powershell
@@ -357,3 +369,5 @@ flowchart LR
 - `node.type` が未指定の場合は `server` として扱う
 - Mermaid 出力では使用された `node.type` ごとに `classDef` と `class` を出力
 - Graphviz 出力では `zones` を `cluster`、`connections` を edge として出力
+- `style.profile` は `default`, `muted`, `contrast` に対応
+- `links` は `connections` の alias として利用可能

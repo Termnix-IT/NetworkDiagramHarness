@@ -9,7 +9,8 @@
 - ネットワーク・サーバ構成を YAML で定義する
 - 定義ファイルから Mermaid の構成図を生成する
 - Graphviz による SVG/PNG/PDF 出力を生成する
-- 将来的に drawsvg/Pyvis/draw.io/PlantUML などへ出力を拡張する
+- drawsvg-style SVG と Pyvis-style HTML を生成する
+- 将来的に draw.io/PlantUML などへ出力を拡張する
 - 構成図の更新漏れや表記ゆれを減らす
 
 ## MVP Scope
@@ -17,7 +18,7 @@
 最初の MVP では、以下に絞ります。
 
 - 入力形式: YAML
-- 出力形式: Mermaid flowchart, Graphviz DOT, SVG/PNG/PDF
+- 出力形式: Mermaid flowchart, Graphviz DOT, SVG/PNG/PDF, HTML
 - 対象要素:
   - network
   - subnet
@@ -99,6 +100,13 @@ network-diagram-harness render examples/web-three-tier.yml --renderer graphviz -
 network-diagram-harness export examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.svg
 ```
 
+追加依存なしで、静的 SVG やインタラクティブ HTML も生成できます。
+
+```powershell
+network-diagram-harness export examples/web-three-tier.yml --renderer drawsvg --output output/web-three-tier-drawsvg.svg
+network-diagram-harness export examples/web-three-tier.yml --renderer pyvis --output output/web-three-tier.html
+```
+
 ## Examples
 
 公開用の架空サンプルを `examples/` に置いています。
@@ -162,7 +170,7 @@ flowchart LR
 優先する拡張候補:
 
 - サブネットや DMZ などのグルーピング
-- Mermaid 以外の出力形式
+- renderer / style / layout hint の拡張
 - IP アドレス、ポート、プロトコルの検証
 - 図面ルールの lint
 - CI での構成図再生成チェック
@@ -186,13 +194,13 @@ flowchart LR
 | `render` | YAML から renderer source を生成します。既定は Mermaid です。 |
 | `validate` | YAML の validation のみ実行します。 |
 | `preview` | Mermaid code block を埋め込んだ Markdown を生成します。 |
-| `export` | Mermaid CLI または Graphviz を使って SVG/PNG/PDF を生成します。 |
+| `export` | renderer を使って SVG/PNG/PDF/HTML を生成します。 |
 | `export-all` | ディレクトリ配下の `*.yml` をまとめて画像化します。 |
 | `export-layout` | 人間が見やすい固定配置 SVG/PNG を生成します。 |
 
 後方互換のため、`network-diagram-harness examples/simple-network.yml` も `render` と同じ動作をします。
 
-Mermaid renderer の `export` には Mermaid CLI の `mmdc` が必要です。Graphviz renderer の `export` には Graphviz の `dot` が必要です。未導入の場合は `render` または `preview` で source を確認できます。
+Mermaid renderer の `export` には Mermaid CLI の `mmdc` が必要です。Graphviz renderer の `export` には Graphviz の `dot` が必要です。`drawsvg` と `pyvis` renderer は追加外部コマンドなしで source を書き出します。
 
 画像出力の運用手順は [docs/image-export-workflow.md](docs/image-export-workflow.md) にまとめています。
 

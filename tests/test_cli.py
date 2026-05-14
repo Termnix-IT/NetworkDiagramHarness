@@ -82,6 +82,30 @@ def test_render_command_can_write_graphviz_dot(capsys) -> None:
     assert 'web [label="Web Server", shape="box"' in output
 
 
+def test_render_command_can_write_pyvis_html(capsys) -> None:
+    input_path = make_test_path("pyvis-render-diagram.yml")
+    input_path.write_text(
+        "nodes:\n"
+        "  - id: web\n"
+        "    name: Web Server\n",
+        encoding="utf-8",
+    )
+
+    run_cli(
+        [
+            "network-diagram-harness",
+            "render",
+            str(input_path),
+            "--renderer",
+            "pyvis",
+        ]
+    )
+
+    output = capsys.readouterr().out
+    assert output.startswith("<!doctype html>")
+    assert "vis-network" in output
+
+
 def test_export_command_uses_mermaid_cli(monkeypatch) -> None:
     input_path = make_test_path("export-diagram.yml")
     output_path = make_test_path("export.svg")
@@ -145,6 +169,31 @@ def test_export_command_can_use_graphviz(monkeypatch) -> None:
     assert calls[0][0][0] == "dot"
     assert "-Tsvg" in calls[0][0]
     assert calls[0][1] is True
+
+
+def test_export_command_can_use_drawsvg() -> None:
+    input_path = make_test_path("drawsvg-export-diagram.yml")
+    output_path = make_test_path("drawsvg-export.svg")
+    input_path.write_text(
+        "nodes:\n"
+        "  - id: web\n"
+        "    name: Web Server\n",
+        encoding="utf-8",
+    )
+
+    run_cli(
+        [
+            "network-diagram-harness",
+            "export",
+            str(input_path),
+            "--output",
+            str(output_path),
+            "--renderer",
+            "drawsvg",
+        ]
+    )
+
+    assert "Web Server" in output_path.read_text(encoding="utf-8")
 
 
 def test_export_all_command_uses_mermaid_cli(monkeypatch, capsys) -> None:

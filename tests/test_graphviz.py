@@ -90,4 +90,31 @@ def test_graphviz_renderer_is_registered() -> None:
 
 
 def test_renderer_names_are_sorted() -> None:
-    assert renderer_names() == ("graphviz", "mermaid")
+    assert renderer_names() == ("drawsvg", "graphviz", "mermaid", "pyvis")
+
+
+def test_graphviz_uses_style_profile_and_rank_hints() -> None:
+    diagram = parse_diagram(
+        {
+            "style": {"profile": "contrast"},
+            "nodes": [
+                {"id": "internet", "name": "Internet", "type": "external", "rank": "source"},
+                {
+                    "id": "web",
+                    "name": "Web",
+                    "type": "server",
+                    "rank": "same",
+                    "order": 1,
+                    "group": "app",
+                },
+            ],
+        }
+    )
+
+    output = render_graphviz_dot(diagram)
+
+    assert 'internet [label="Internet", shape="oval", fillcolor="#dbeafe", color="#1d4ed8"' in output
+    assert 'web [label="Web", shape="box", fillcolor="#ddd6fe", color="#5b21b6"' in output
+    assert 'group="app"' in output
+    assert '{ rank="same"; web; }' in output
+    assert '{ rank="source"; internet; }' in output

@@ -3,6 +3,10 @@ from __future__ import annotations
 import re
 
 from network_diagram_harness.model import Connection, Diagram, Node
+from network_diagram_harness.renderers.styles import (
+    node_style_profile,
+    zone_style_profile,
+)
 
 
 RANK_DIRECTIONS = {
@@ -16,47 +20,25 @@ RANK_DIRECTIONS = {
 NODE_STYLES = {
     "database": {
         "shape": "cylinder",
-        "fillcolor": "#fef3c7",
-        "color": "#b45309",
     },
     "external": {
         "shape": "oval",
-        "fillcolor": "#e0f2fe",
-        "color": "#0369a1",
     },
     "firewall": {
         "shape": "diamond",
-        "fillcolor": "#fee2e2",
-        "color": "#b91c1c",
     },
     "load_balancer": {
         "shape": "component",
-        "fillcolor": "#dcfce7",
-        "color": "#15803d",
     },
     "network": {
         "shape": "box3d",
-        "fillcolor": "#f1f5f9",
-        "color": "#475569",
     },
     "server": {
         "shape": "box",
-        "fillcolor": "#ede9fe",
-        "color": "#6d28d9",
     },
     "subnet": {
         "shape": "folder",
-        "fillcolor": "#ecfeff",
-        "color": "#0e7490",
     },
-}
-
-ZONE_STYLES = {
-    "cloud": ("#fefce8", "#ca8a04"),
-    "dmz": ("#fff7ed", "#f97316"),
-    "edge": ("#fff7ed", "#f97316"),
-    "internet": ("#f8fafc", "#94a3b8"),
-    "internal": ("#f0fdf4", "#16a34a"),
 }
 
 
@@ -91,17 +73,19 @@ def render_graphviz_dot(diagram: Diagram) -> str:
         if not zone_nodes:
             continue
 
-        fill, color = zone_style(zone.id, zone.name)
+        fill, color = zone_style(diagram, zone.id, zone.name)
         lines.append(f"  subgraph {cluster_id(zone.id)} {{")
         lines.append(f"    graph [{format_attributes(cluster_attributes(zone.name, fill, color))}];")
-        for node in zone_nodes:
-            lines.append(f"    {node_id(node.id)} [{format_attributes(node_attributes(node))}];")
+        for node in sort_nodes(zone_nodes):
+            lines.append(f"    {node_id(node.id)} [{format_attributes(node_attributes(diagram, node))}];")
             rendered_nodes.add(node.id)
         lines.append("  }")
 
-    for node in diagram.nodes:
+    for node in sort_nodes(diagram.nodes):
         if node.id not in rendered_nodes:
-            lines.append(f"  {node_id(node.id)} [{format_attributes(node_attributes(node))}];")
+            lines.append(f"  {node_id(node.id)} [{format_attributes(node_attributes(diagram, node))}];")
+
+    lines.extend(render_rank_hints(diagram))
 
     for connection in diagram.connections:
         lines.append(render_edge(connection))
@@ -136,15 +120,18 @@ def cluster_attributes(name: str, fill: str, color: str) -> dict[str, str]:
     }
 
 
-def node_attributes(node: Node) -> dict[str, str]:
-    style = NODE_STYLES[node.type]
+def node_attributes(diagram: Diagram, node: Node) -> dict[str, str]:
+    shape_style = NODE_STYLES[node.type]
+    color_style = node_style_profile(diagram.style.profile)[node.type]
     attributes = {
         "label": render_node_label(node),
-        "shape": style["shape"],
-        "fillcolor": style["fillcolor"],
-        "color": style["color"],
+        "shape": shape_style["shape"],
+        "fillcolor": color_style["fillcolor"],
+        "color": color_style["color"],
         "penwidth": "1.5",
     }
+    if node.group:
+        attributes["group"] = node.group
     if node.type == "firewall":
         attributes["margin"] = "0.16,0.10"
     if node.type in {"external", "load_balancer"}:
@@ -190,19 +177,37 @@ def render_connection_label(connection: Connection) -> str | None:
     return " / ".join(parts) if parts else None
 
 
-def zone_style(zone_id: str, zone_name: str) -> tuple[str, str]:
+def render_rank_hints(diagram: Diagram) -> list[str]:
+    rank_nodes: dict[str, list[Node]] = {}
+    for node in diagram.nodes:
+        if node.rank:
+            rank_nodes.setdefault(node.rank, []).append(node)
+
+    lines = []
+    for rank in sorted(rank_nodes):
+        ids = "; ".join(node_id(node.id) for node in sort_nodes(rank_nodes[rank]))
+        lines.append(f"  {{ rank={quote(rank)}; {ids}; }}")
+    return lines
+
+
+def sort_nodes(nodes: list[Node]) -> list[Node]:
+    return sorted(nodes, key=lambda node: (node.order is None, node.order or 0, node.id))
+
+
+def zone_style(diagram: Diagram, zone_id: str, zone_name: str) -> tuple[str, str]:
     value = f"{zone_id} {zone_name}".lower()
+    styles = zone_style_profile(diagram.style.profile)
     if "internet" in value:
-        return ZONE_STYLES["internet"]
+        return styles["internet"]
     if "aws" in value or "cloud" in value:
-        return ZONE_STYLES["cloud"]
+        return styles["cloud"]
     if "edge" in value:
-        return ZONE_STYLES["edge"]
+        return styles["edge"]
     if "dmz" in value:
-        return ZONE_STYLES["dmz"]
+        return styles["dmz"]
     if "internal" in value:
-        return ZONE_STYLES["internal"]
-    return "#f8fafc", "#cbd5e1"
+        return styles["internal"]
+    return styles["other"]
 
 
 def format_attributes(attributes: dict[str, str]) -> str:

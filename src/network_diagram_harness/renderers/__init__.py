@@ -1,13 +1,17 @@
 from __future__ import annotations
 
 from .base import DiagramRenderer
+from .drawsvg import DrawsvgRenderer
 from .graphviz import GraphvizRenderer
 from .mermaid import MermaidRenderer
+from .pyvis import PyvisRenderer
 
 
 RENDERERS: dict[str, DiagramRenderer] = {
+    "drawsvg": DrawsvgRenderer(),
     "graphviz": GraphvizRenderer(),
     "mermaid": MermaidRenderer(),
+    "pyvis": PyvisRenderer(),
 }
 
 

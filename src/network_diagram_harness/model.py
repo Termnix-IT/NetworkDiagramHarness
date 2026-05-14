@@ -18,11 +18,18 @@ ALLOWED_NODE_TYPES = {
 }
 ALLOWED_CONNECTION_DIRECTIONS = {"outbound", "inbound", "bidirectional"}
 ALLOWED_LAYOUT_PROFILES = {"home_lab", "home_lab_private"}
+ALLOWED_STYLE_PROFILES = {"contrast", "default", "muted"}
+ALLOWED_NODE_RANKS = {"min", "same", "source", "sink", "max"}
 PROTOCOL_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+._-]*$")
 
 
 @dataclass(frozen=True)
 class Layout:
+    profile: str | None = None
+
+
+@dataclass(frozen=True)
+class Style:
     profile: str | None = None
 
 
@@ -43,6 +50,9 @@ class Node:
     role: str | None = None
     environment: str | None = None
     description: str | None = None
+    rank: str | None = None
+    order: int | None = None
+    group: str | None = None
 
 
 @dataclass(frozen=True)
@@ -61,6 +71,7 @@ class Diagram:
     title: str | None
     direction: str
     layout: Layout
+    style: Style
     zones: list[Zone]
     nodes: list[Node]
     connections: list[Connection]
@@ -90,10 +101,14 @@ def parse_diagram(data: dict[str, Any]) -> Diagram:
             description=str(item["description"])
             if item.get("description") is not None
             else None,
+            rank=str(item["rank"]) if item.get("rank") is not None else None,
+            order=parse_order(item.get("order")),
+            group=str(item["group"]) if item.get("group") is not None else None,
         )
         for item in data.get("nodes", [])
     ]
 
+    connection_items = data.get("connections", data.get("links", []))
     connections = [
         Connection(
             source=str(item["source"]),
@@ -104,13 +119,14 @@ def parse_diagram(data: dict[str, Any]) -> Diagram:
             purpose=str(item["purpose"]) if item.get("purpose") is not None else None,
             direction=str(item.get("direction", "outbound")),
         )
-        for item in data.get("connections", [])
+        for item in connection_items
     ]
 
     diagram = Diagram(
         title=str(data["title"]) if data.get("title") else None,
         direction=str(data.get("direction", "LR")),
         layout=parse_layout(data.get("layout")),
+        style=parse_style(data.get("style")),
         zones=zones,
         nodes=nodes,
         connections=connections,
@@ -128,11 +144,22 @@ def parse_layout(value: Any) -> Layout:
     return Layout(profile=str(profile) if profile is not None else None)
 
 
+def parse_style(value: Any) -> Style:
+    if value is None:
+        return Style()
+    if not isinstance(value, dict):
+        raise ValueError("style must be a mapping")
+    profile = value.get("profile")
+    return Style(profile=str(profile) if profile is not None else None)
+
+
 def validate_diagram(diagram: Diagram) -> None:
     if diagram.direction not in ALLOWED_DIRECTIONS:
         raise ValueError(f"Unsupported Mermaid direction: {diagram.direction}")
     if diagram.layout.profile and diagram.layout.profile not in ALLOWED_LAYOUT_PROFILES:
         raise ValueError(f"Unsupported layout profile: {diagram.layout.profile}")
+    if diagram.style.profile and diagram.style.profile not in ALLOWED_STYLE_PROFILES:
+        raise ValueError(f"Unsupported style profile: {diagram.style.profile}")
 
     zone_ids = [zone.id for zone in diagram.zones]
     duplicated_zones = sorted(
@@ -154,6 +181,8 @@ def validate_diagram(diagram: Diagram) -> None:
             raise ValueError(f"Unknown node zone: {node.zone}")
         if node.ip:
             validate_ip_address(node.ip)
+        if node.rank and node.rank not in ALLOWED_NODE_RANKS:
+            raise ValueError(f"Unsupported node rank: {node.rank}")
 
     known_nodes = set(node_ids)
     for connection in diagram.connections:
@@ -188,6 +217,15 @@ def parse_port(value: Any) -> int | str | None:
     port_number = parse_port_number(port, port)
     validate_port_number(port_number)
     return port_number
+
+
+def parse_order(value: Any) -> int | None:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"Invalid node order: {value}") from error
 
 
 def parse_port_number(value: str, original: str) -> int:

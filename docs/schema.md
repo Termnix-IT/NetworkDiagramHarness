@@ -11,6 +11,8 @@ title: Web Three Tier Network
 direction: LR
 layout:
   profile: home_lab
+style:
+  profile: default
 zones: []
 nodes: []
 connections: []
@@ -21,9 +23,11 @@ connections: []
 | `title` | no | string | `null` | 図のタイトル。Mermaid ではコメントとして出力します。 |
 | `direction` | no | string | `LR` | Mermaid flowchart の向きです。 |
 | `layout` | no | object | `{}` | 掲載向け SVG など、人間向け画像出力の layout 設定です。 |
+| `style` | no | object | `{}` | renderer の色や見た目の profile 設定です。 |
 | `zones` | no | array | `[]` | ネットワーク領域やセグメントの一覧です。 |
 | `nodes` | no | array | `[]` | サーバ、DB、Firewall などの構成要素です。 |
 | `connections` | no | array | `[]` | node 間の接続情報です。 |
+| `links` | no | array | `[]` | `connections` の alias です。`connections` がある場合は `connections` を優先します。 |
 
 ## Layout
 
@@ -44,6 +48,27 @@ layout:
 | --- | --- |
 | `home_lab` | 自宅ネットワーク / home lab 向けの固定配置 template です。Internet, Cloud, Edge, DMZ, Internal, VLAN 系の領域を見やすく配置します。 |
 | `home_lab_private` | 実 IP や長い role を含む自分向け構成図用の広めの固定配置 template です。 |
+
+## Style
+
+`style` は renderer の色や見た目の profile を指定します。
+
+```yaml
+style:
+  profile: contrast
+```
+
+| Field | Required | Type | Default | Description |
+| --- | --- | --- | --- | --- |
+| `profile` | no | string | `null` | renderer style profile の名前です。未指定時は `default` として扱います。 |
+
+許可値:
+
+| Value | Meaning |
+| --- | --- |
+| `default` | 標準の色分けです。 |
+| `muted` | 落ち着いた色の profile です。 |
+| `contrast` | コントラストを強めた profile です。 |
 
 ## Direction
 
@@ -94,6 +119,9 @@ nodes:
     role: web
     environment: production
     description: Handles web traffic.
+    rank: same
+    order: 10
+    group: app
 ```
 
 | Field | Required | Type | Default | Description |
@@ -106,6 +134,9 @@ nodes:
 | `role` | no | string | `null` | node の役割です。 |
 | `environment` | no | string | `null` | `production`, `staging` などの環境名です。現時点では Mermaid 出力には使いません。 |
 | `description` | no | string | `null` | node の説明です。現時点では Mermaid 出力には使いません。 |
+| `rank` | no | string | `null` | Graphviz などの layout hint です。 |
+| `order` | no | integer | `null` | renderer が node の表示順を決めるための hint です。 |
+| `group` | no | string | `null` | Graphviz/Pyvis などで node を同じ group として扱うための hint です。 |
 
 ### Node Types
 
@@ -120,6 +151,20 @@ nodes:
 | `subnet` | rectangle | Subnet や segment |
 
 未知の `type` は validation error です。
+
+### Layout Hints
+
+`rank`, `order`, `group` は renderer 向けの hint です。Mermaid preview では無視されます。
+
+`rank` の許可値:
+
+| Value | Meaning |
+| --- | --- |
+| `source` | Graphviz の source rank |
+| `min` | Graphviz の min rank |
+| `same` | 同じ rank への配置 |
+| `max` | Graphviz の max rank |
+| `sink` | Graphviz の sink rank |
 
 ### Node Label
 
@@ -136,7 +181,7 @@ name<br/>role
 
 ## Connections
 
-`connections` は node 間の接続を表します。
+`connections` は node 間の接続を表します。`links` は `connections` の alias として利用できます。
 
 ```yaml
 connections:
@@ -347,7 +392,21 @@ Graphviz renderer は `zones` を `cluster` として出力し、`nodes[].type` 
 network-diagram-harness render examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.dot
 ```
 
-現時点の色、形、cluster style は renderer 側の固定値です。YAML から Graphviz style を直接指定する仕組みはまだ正式仕様ではありません。
+色は `style.profile` によって切り替えられます。個別 node や edge に直接 style を指定する仕組みはまだ正式仕様ではありません。
+
+## drawsvg And Pyvis Rendering
+
+`drawsvg` renderer は静的 SVG を出力します。
+
+```powershell
+network-diagram-harness export examples/web-three-tier.yml --renderer drawsvg --output output/web-three-tier-drawsvg.svg
+```
+
+`pyvis` renderer は HTML を出力します。
+
+```powershell
+network-diagram-harness export examples/web-three-tier.yml --renderer pyvis --output output/web-three-tier.html
+```
 
 ## Image Export
 
@@ -357,7 +416,7 @@ network-diagram-harness render examples/web-three-tier.yml --renderer graphviz -
 network-diagram-harness export examples/web-three-tier.yml --output output/web-three-tier.svg
 ```
 
-既定の `export` は Mermaid CLI の `mmdc` を呼び出します。Graphviz renderer を使う場合は `--renderer graphviz` を指定します。
+既定の `export` は Mermaid CLI の `mmdc` を呼び出します。別 renderer を使う場合は `--renderer` を指定します。
 
 ```powershell
 network-diagram-harness export examples/web-three-tier.yml --renderer graphviz --output output/web-three-tier.svg

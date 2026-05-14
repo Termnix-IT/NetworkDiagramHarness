@@ -1,6 +1,6 @@
 # Image Export Workflow
 
-このドキュメントは、YAML から Mermaid または Graphviz を経由して SVG/PNG/PDF を生成する画像出力ハーネスの使い方です。
+このドキュメントは、YAML から Mermaid、Graphviz、drawsvg-style SVG、Pyvis-style HTML を生成する画像出力ハーネスの使い方です。
 
 ## Requirements
 
@@ -15,6 +15,8 @@ Graphviz renderer の画像出力には Graphviz の `dot` が必要です。
 ```powershell
 dot -V
 ```
+
+`drawsvg` と `pyvis` renderer は追加の外部コマンドなしで出力できます。
 
 `mmdc` が使えない環境でも、以下は利用できます。
 
@@ -65,6 +67,18 @@ Graphviz renderer で SVG/PNG/PDF を生成する場合:
 .\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --renderer graphviz --output output/images/web-three-tier.pdf
 ```
 
+静的 SVG を追加外部コマンドなしで生成する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --renderer drawsvg --output output/images/web-three-tier-drawsvg.svg
+```
+
+インタラクティブ HTML を生成する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export examples/web-three-tier.yml --renderer pyvis --output output/images/web-three-tier.html
+```
+
 ## Batch Export
 
 `examples/` 配下の全 YAML を SVG にします。
@@ -83,6 +97,12 @@ Graphviz renderer でまとめて画像化する場合:
 
 ```powershell
 .\.venv\Scripts\network-diagram-harness.exe export-all examples --renderer graphviz --output-dir output/images --format svg
+```
+
+Pyvis renderer で HTML をまとめて生成する場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export-all examples --renderer pyvis --output-dir output/html --format html
 ```
 
 ## Profile Image Export
@@ -154,7 +174,7 @@ YAML
   -> validate
   -> preview
   -> review Markdown Mermaid preview
-  -> export SVG/PNG/PDF with Mermaid or Graphviz
+  -> export SVG/PNG/PDF/HTML with selected renderer
 ```
 
 最初から画像だけを見るのではなく、まず Markdown preview で構成を確認してから画像化します。

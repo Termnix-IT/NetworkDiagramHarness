@@ -6,11 +6,15 @@ from pathlib import Path
 from .io import load_diagram
 from .mermaid import render_mermaid
 from .model import Diagram
+from .renderers.drawsvg import render_drawsvg_svg
 from .renderers.graphviz import render_graphviz_dot
+from .renderers.pyvis import render_pyvis_html
 
 
 SUPPORTED_EXPORT_FORMATS = {".svg", ".png", ".pdf"}
 SUPPORTED_GRAPHVIZ_EXPORT_FORMATS = {".svg", ".png", ".pdf"}
+SUPPORTED_DRAWSVG_EXPORT_FORMATS = {".svg"}
+SUPPORTED_PYVIS_EXPORT_FORMATS = {".html"}
 
 
 def export_diagram(
@@ -23,6 +27,9 @@ def export_diagram(
     width: int | None = None,
     height: int | None = None,
 ) -> None:
+    if renderer == "drawsvg":
+        export_with_drawsvg(diagram, output_path)
+        return
     if renderer == "graphviz":
         export_with_graphviz(diagram, output_path, dot_command)
         return
@@ -35,6 +42,9 @@ def export_diagram(
             width,
             height,
         )
+        return
+    if renderer == "pyvis":
+        export_with_pyvis(diagram, output_path)
         return
 
     raise_unsupported_renderer(renderer)
@@ -51,6 +61,16 @@ def export_directory(
     width: int | None = None,
     height: int | None = None,
 ) -> list[Path]:
+    if renderer == "drawsvg":
+        suffix = normalize_export_suffix(image_format)
+        if suffix not in SUPPORTED_DRAWSVG_EXPORT_FORMATS:
+            raise ValueError(f"Unsupported drawsvg export format: {image_format}. Use one of: svg")
+        return export_directory_with_source_renderer(
+            input_dir,
+            output_dir,
+            suffix,
+            render_drawsvg_svg,
+        )
     if renderer == "graphviz":
         return export_directory_with_graphviz(
             input_dir,
@@ -68,12 +88,25 @@ def export_directory(
             width,
             height,
         )
+    if renderer == "pyvis":
+        suffix = normalize_export_suffix(image_format)
+        if suffix not in SUPPORTED_PYVIS_EXPORT_FORMATS:
+            raise ValueError(f"Unsupported pyvis export format: {image_format}. Use one of: html")
+        return export_directory_with_source_renderer(
+            input_dir,
+            output_dir,
+            suffix,
+            render_pyvis_html,
+        )
 
     raise_unsupported_renderer(renderer)
 
 
 def raise_unsupported_renderer(renderer: str) -> None:
-    raise ValueError(f"Unsupported export renderer: {renderer}. Use one of: graphviz, mermaid")
+    raise ValueError(
+        "Unsupported export renderer: "
+        f"{renderer}. Use one of: drawsvg, graphviz, mermaid, pyvis"
+    )
 
 
 def export_with_mermaid_cli(
@@ -210,6 +243,44 @@ def export_directory_with_graphviz(
         diagram = load_diagram(input_path)
         output_path = output_dir / f"{input_path.stem}{suffix}"
         export_with_graphviz(diagram, output_path, dot_command)
+        output_paths.append(output_path)
+
+    return output_paths
+
+
+def export_with_drawsvg(diagram: Diagram, output_path: Path) -> None:
+    suffix = output_path.suffix.lower()
+    if suffix not in SUPPORTED_DRAWSVG_EXPORT_FORMATS:
+        raise ValueError(f"Unsupported drawsvg export format: {suffix}. Use one of: .svg")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(render_drawsvg_svg(diagram), encoding="utf-8")
+
+
+def export_with_pyvis(diagram: Diagram, output_path: Path) -> None:
+    suffix = output_path.suffix.lower()
+    if suffix not in SUPPORTED_PYVIS_EXPORT_FORMATS:
+        raise ValueError(f"Unsupported pyvis export format: {suffix}. Use one of: .html")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(render_pyvis_html(diagram), encoding="utf-8")
+
+
+def export_directory_with_source_renderer(
+    input_dir: Path,
+    output_dir: Path,
+    suffix: str,
+    render_source,
+) -> list[Path]:
+    if not input_dir.exists():
+        raise ValueError(f"Input directory does not exist: {input_dir}")
+    if not input_dir.is_dir():
+        raise ValueError(f"Input path is not a directory: {input_dir}")
+
+    output_paths = []
+    for input_path in sorted(input_dir.glob("*.yml")):
+        diagram = load_diagram(input_path)
+        output_path = output_dir / f"{input_path.stem}{suffix}"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(render_source(diagram), encoding="utf-8")
         output_paths.append(output_path)
 
     return output_paths

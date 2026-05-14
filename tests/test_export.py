@@ -115,6 +115,28 @@ def test_export_diagram_dispatches_to_graphviz(monkeypatch) -> None:
     assert calls[0][0][0] == "dot"
 
 
+def test_export_diagram_can_write_drawsvg() -> None:
+    diagram = parse_diagram({"nodes": [{"id": "web", "name": "Web Server"}]})
+    output_path = TEST_DIR / "drawsvg.svg"
+
+    export_diagram(diagram, output_path, renderer="drawsvg")
+
+    content = output_path.read_text(encoding="utf-8")
+    assert content.startswith('<?xml version="1.0" encoding="UTF-8"?>')
+    assert "Web Server" in content
+
+
+def test_export_diagram_can_write_pyvis() -> None:
+    diagram = parse_diagram({"nodes": [{"id": "web", "name": "Web Server"}]})
+    output_path = TEST_DIR / "pyvis.html"
+
+    export_diagram(diagram, output_path, renderer="pyvis")
+
+    content = output_path.read_text(encoding="utf-8")
+    assert content.startswith("<!doctype html>")
+    assert "vis-network" in content
+
+
 def test_export_diagram_rejects_unknown_renderer() -> None:
     diagram = parse_diagram({"nodes": [{"id": "web", "name": "Web Server"}]})
 
@@ -222,3 +244,28 @@ def test_export_directory_dispatches_to_graphviz(monkeypatch) -> None:
 
     assert output_paths == [output_dir / "diagram.png"]
     assert calls[0][0][0] == "dot"
+
+
+def test_export_directory_dispatches_to_pyvis() -> None:
+    input_dir = TEST_DIR / "pyvis-export-all-input"
+    output_dir = TEST_DIR / "pyvis-export-all-output"
+    if input_dir.exists():
+        for path in input_dir.glob("*.yml"):
+            path.unlink()
+    input_dir.mkdir(parents=True, exist_ok=True)
+    (input_dir / "diagram.yml").write_text(
+        "nodes:\n"
+        "  - id: web\n"
+        "    name: Web Server\n",
+        encoding="utf-8",
+    )
+
+    output_paths = export_directory(
+        input_dir,
+        output_dir,
+        renderer="pyvis",
+        image_format="html",
+    )
+
+    assert output_paths == [output_dir / "diagram.html"]
+    assert output_paths[0].read_text(encoding="utf-8").startswith("<!doctype html>")

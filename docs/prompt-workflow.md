@@ -11,7 +11,7 @@ user prompt
   -> harness preview
   -> user reviews Mermaid preview
   -> Codex updates YAML if needed
-  -> optional image export with Mermaid or Graphviz
+  -> optional image export with selected renderer
 ```
 
 ## Where To Put Files
@@ -140,6 +140,18 @@ Graphviz が使える場合:
 .\.venv\Scripts\network-diagram-harness.exe export local/<name>.local.yml --renderer graphviz --output output/<name>.svg
 ```
 
+追加外部コマンドなしで静的 SVG を出す場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export local/<name>.local.yml --renderer drawsvg --output output/<name>-drawsvg.svg
+```
+
+インタラクティブ HTML を出す場合:
+
+```powershell
+.\.venv\Scripts\network-diagram-harness.exe export local/<name>.local.yml --renderer pyvis --output output/<name>.html
+```
+
 複数ファイルをまとめて画像化する場合:
 
 ```powershell
@@ -164,7 +176,7 @@ Codex は以下の順序で作業します。
 6. validation error があれば YAML を修正する
 7. `preview` を実行する
 8. 出力 Markdown の場所を報告する
-9. 画像出力が必要な場合は `export` を実行する。見た目重視なら `--renderer graphviz` を優先する
+9. 画像出力が必要な場合は `export` を実行する。見た目重視なら `--renderer graphviz`、追加外部コマンドなしなら `--renderer drawsvg`、インタラクティブ確認なら `--renderer pyvis` を使う
 
 ## Review Points
 
